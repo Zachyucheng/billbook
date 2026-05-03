@@ -8,7 +8,6 @@ Billbook 是一款面向消费对象追踪的桌面账本应用，基于 Electro
 
 - `desktop/` — Electron 主进程、preload bridge、Hermes 管理器、本地 MCP 服务器
 - `scripts/` — 开发辅助脚本
-- `docs/` — 开发文档
 
 > 💡 前端源码（`web/`）已从公开仓库中移除，如需获取请联系作者。
 
@@ -37,3 +36,9 @@ npm run pack:mac        # 打包 macOS 安装包
 - ❌ 商业使用需获得作者书面授权
 
 详见 [NOTICE.md](./NOTICE.md) 和 [LICENSE](./LICENSE)。
+
+---
+
+📦 **国际物流 · 欧美DDP货代**
+我是做欧美 DDP 双清包税的货代，外贸/跨境电商的朋友有发货需求欢迎联系👇
+**微信 / 电话：v13025498279**
