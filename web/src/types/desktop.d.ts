@@ -9,7 +9,6 @@ export type DesktopDatabaseStatus = {
   exists: boolean;
   workspaceName: string;
   syncedAt: string | null;
-  accountEmail: string;
   objectCount: number;
   transactionCount: number;
   categoryCount: number;
@@ -17,8 +16,6 @@ export type DesktopDatabaseStatus = {
 };
 
 export type DesktopWorkspaceSyncPayload = {
-  accountId: string | null;
-  accountEmail: string | null;
   workspaceUserName: string | null;
   syncedAt: string;
   state: unknown;

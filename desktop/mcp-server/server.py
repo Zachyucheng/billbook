@@ -538,7 +538,6 @@ async def handle_get_database_info(conn: sqlite3.Connection) -> list[TextContent
     info = {
         "workspace_name": meta.get("workspace_name", ""),
         "synced_at": meta.get("synced_at", "never"),
-        "account_email": meta.get("account_email", "not logged in"),
         "currency": meta.get("currency", "CNY"),
         "theme": meta.get("theme", "fern"),
         "language": meta.get("language", "zh-CN"),

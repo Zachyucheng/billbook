@@ -244,8 +244,6 @@ class LedgerSqliteStore {
       this.setMetadata(db, "language", payload.state.preferences.language);
       this.setMetadata(db, "storage_path", payload.state.preferences.storagePath);
       this.setMetadata(db, "synced_at", syncedAt);
-      this.setMetadata(db, "account_email", payload.accountEmail || "");
-      this.setMetadata(db, "account_id", payload.accountId || "");
       this.setMetadata(db, "workspace_user_name", payload.workspaceUserName || "");
 
       const snapshotStatement = db.prepare(`
@@ -483,8 +481,6 @@ class LedgerSqliteStore {
       this.replaceWorkspaceState(db, {
         state: nextState,
         syncedAt: mutationTimestamp,
-        accountEmail: metadata.account_email || "",
-        accountId: metadata.account_id || "",
         workspaceUserName: metadata.workspace_user_name || "",
       });
 
@@ -543,8 +539,6 @@ class LedgerSqliteStore {
       this.replaceWorkspaceState(db, {
         state: nextState,
         syncedAt: mutationTimestamp,
-        accountEmail: metadata.account_email || "",
-        accountId: metadata.account_id || "",
         workspaceUserName: metadata.workspace_user_name || "",
       });
 
@@ -598,8 +592,6 @@ class LedgerSqliteStore {
       this.replaceWorkspaceState(db, {
         state: nextState,
         syncedAt: mutationTimestamp,
-        accountEmail: metadata.account_email || "",
-        accountId: metadata.account_id || "",
         workspaceUserName: metadata.workspace_user_name || "",
       });
 
@@ -629,7 +621,6 @@ class LedgerSqliteStore {
       exists: fs.existsSync(this.dbPath),
       workspaceName: metadata.workspace_name || "",
       syncedAt: metadata.synced_at || null,
-      accountEmail: metadata.account_email || "",
       objectCount,
       transactionCount,
       categoryCount,

@@ -1,15 +1,13 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-const { app, BrowserWindow, dialog, ipcMain, Menu, safeStorage, shell, Tray, nativeImage } = require("electron");
+const { app, BrowserWindow, dialog, ipcMain, Menu, shell, Tray, nativeImage } = require("electron");
 const path = require("node:path");
 const fs = require("node:fs");
 const fsp = require("node:fs/promises");
 const { DesktopAppServer } = require("./app-server");
 const { LedgerSqliteStore } = require("./ledger-sqlite");
 
-const DEFAULT_AUTH_BASE_URL = "https://billbook.pages.dev";
 const DEFAULT_DEV_UPSTREAM_URL = "http://127.0.0.1:3000";
 const DESKTOP_ENTRY_PATH = "/workspace/";
-const DESKTOP_SESSION_FILE = "desktop-auth-session.json";
 let ledgerStore = null;
 let latestDatabaseStatus = null;
 let appServer = null;
@@ -28,7 +26,6 @@ async function readDatabaseStatus() {
       exists: false,
       workspaceName: "",
       syncedAt: null,
-      accountEmail: "",
       objectCount: 0,
       transactionCount: 0,
       categoryCount: 0,
@@ -142,13 +139,12 @@ function buildTrayMenu() {
     },
     { type: "separator" },
     {
-      label: `开机自启`,
+      label: "开机自启",
       type: "checkbox",
       checked: autoStart,
       click: (menuItem) => {
         try {
           app.setLoginItemSettings({ openAtLogin: menuItem.checked });
-          // rebuild to keep state consistent
           tray.setContextMenu(buildTrayMenu());
         } catch (e) {
           console.error("Auto-start toggle failed:", e);
@@ -161,7 +157,6 @@ function buildTrayMenu() {
       checked: mcpOn,
       click: async (menuItem) => {
         await setMcpEnabled(menuItem.checked);
-        // broadcast to renderer
         if (mainWindow && !mainWindow.isDestroyed()) {
           mainWindow.webContents.send("desktop:hermes-access-changed", menuItem.checked);
         }
@@ -182,12 +177,10 @@ function createTray() {
   const iconPath = getTrayIconPath();
   const icon = nativeImage.createFromPath(iconPath);
 
-  // On Windows 32×32 is fine; resize to 16×16 for high-DPI
   tray = new Tray(icon);
   tray.setToolTip("Billbook Desktop");
   tray.setContextMenu(buildTrayMenu());
 
-  // Left-click → show window
   tray.on("click", () => {
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore();
@@ -196,26 +189,9 @@ function createTray() {
     }
   });
 
-  // Auto-rebuild menu on right-click to reflect latest state
   tray.on("right-click", () => {
     tray.setContextMenu(buildTrayMenu());
   });
-}
-
-/* ---------- encryption ---------- */
-
-function encryptDesktopSession(value) {
-  if (!safeStorage.isEncryptionAvailable()) return value;
-  return safeStorage.encryptString(value).toString("base64");
-}
-
-function decryptDesktopSession(value) {
-  if (!safeStorage.isEncryptionAvailable()) return value;
-  try {
-    return safeStorage.decryptString(Buffer.from(value, "base64"));
-  } catch {
-    return value;
-  }
 }
 
 /* ---------- app server ---------- */
@@ -223,10 +199,6 @@ function decryptDesktopSession(value) {
 async function startDesktopAppServer() {
   const rootDir = path.resolve(__dirname, "..");
   const mode = isDevelopment() ? "development" : "production";
-  const authBaseUrl =
-    process.env.BILLBOOK_DESKTOP_AUTH_BASE_URL ||
-    process.env.BILLBOOK_DESKTOP_APP_URL ||
-    DEFAULT_AUTH_BASE_URL;
   const upstreamUrl =
     process.env.BILLBOOK_DESKTOP_UPSTREAM_URL ||
     process.env.BILLBOOK_DESKTOP_DEV_SERVER_URL ||
@@ -234,13 +206,9 @@ async function startDesktopAppServer() {
 
   appServer = new DesktopAppServer({
     mode,
-    authBaseUrl,
     upstreamUrl,
     staticDir: path.join(rootDir, "out"),
     port: Number(process.env.BILLBOOK_DESKTOP_SERVER_PORT || "3210"),
-    sessionStorePath: path.join(app.getPath("userData"), DESKTOP_SESSION_FILE),
-    encryptString: encryptDesktopSession,
-    decryptString: decryptDesktopSession,
   });
 
   await appServer.start();

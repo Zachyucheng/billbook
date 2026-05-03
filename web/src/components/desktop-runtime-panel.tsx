@@ -15,7 +15,6 @@ type DesktopDatabaseStatus = {
   exists: boolean;
   workspaceName: string;
   syncedAt: string | null;
-  accountEmail: string;
   objectCount: number;
   transactionCount: number;
   categoryCount: number;
@@ -69,8 +68,6 @@ export function DesktopRuntimePanel() {
     setBusyAction("sync");
     try {
       const nextStatus = await window.billbookDesktop.syncWorkspace({
-        accountId: null,
-        accountEmail: null,
         workspaceUserName: currentUser?.name ?? null,
         syncedAt: new Date().toISOString(),
         state,
@@ -143,7 +140,6 @@ export function DesktopRuntimePanel() {
               <div className="grid gap-3 md:grid-cols-2">
                 <Stat label="应用地址" value={environment.appUrl} />
                 <Stat label="数据库路径" value={databaseStatus?.path || "等待初始化"} />
-                <Stat label="同步账号" value={databaseStatus?.accountEmail || "未登录"} />
                 <Stat label="Hermes 访问" value={hermesAccess ? "已开启" : "已关闭"} />
               </div>
             </div>

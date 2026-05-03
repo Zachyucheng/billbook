@@ -1505,8 +1505,6 @@ function createDesktopWorkspaceSyncPayload(
   currentUser: TeamMember | null,
 ) {
   return {
-    accountId: null,
-    accountEmail: null,
     workspaceUserName: currentUser?.name ?? null,
     syncedAt: new Date().toISOString(),
     state,
