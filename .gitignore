@@ -14,13 +14,8 @@
 # testing
 /coverage
 
-# next.js (web build)
-/.next-web/
-/web/out/
-/web/.next/
-
-# cloudflare wrangler cache
-/web/.wrangler/
+# next.js (web build) — entire frontend is private
+/web/
 
 # production build (desktop)
 /out/
