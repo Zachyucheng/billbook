@@ -19,6 +19,9 @@
 /web/out/
 /web/.next/
 
+# cloudflare wrangler cache
+/web/.wrangler/
+
 # production build (desktop)
 /out/
 /build
