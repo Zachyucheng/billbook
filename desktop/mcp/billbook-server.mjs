@@ -769,6 +769,14 @@ async function main() {
   await server.connect(transport);
   console.error("Billbook desktop MCP server running on stdio");
 
+  // Auto-initialize empty database on first run (no desktop app needed)
+  try {
+    await ledgerStore.initializeIfEmpty();
+    console.error("Billbook database initialized (or already exists).");
+  } catch (e) {
+    console.error("Billbook database init warning:", e.message);
+  }
+
   // If database is fresh/empty, log initialization hint to stderr
   try {
     const status = await ledgerStore.getDatabaseStatus();

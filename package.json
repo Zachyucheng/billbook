@@ -1,5 +1,5 @@
 {
-  "name": "billbook",
+  "name": "billbook-mcp",
   "version": "2.41.0",
   "private": true,
   "main": "desktop/main.js",
@@ -12,7 +12,8 @@
     "pack:win": "npm run build && electron-builder --win --x64",
     "pack:mac": "npm run build && electron-builder --mac --x64",
     "pack:all": "npm run build && electron-builder --win --mac --x64",
-    "dist": "npm run build && electron-builder --win --x64"
+    "dist": "npm run build && electron-builder --win --x64",
+    "setup:mcp": "node scripts/setup-mcp.js"
   },
   "build": {
     "appId": "com.billbook.desktop",

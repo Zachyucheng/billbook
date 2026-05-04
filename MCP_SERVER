@@ -1,0 +1,9 @@
+This project provides an MCP server for Hermes AI Agent.
+
+MCP server entry point: desktop/mcp/billbook-server.mjs
+
+Setup: npm install && npm run setup:mcp
+Read: AGENTS.md for Hermes Agent configuration instructions
+Read: CLAUDE.md for Claude Code instructions
+
+25 tools available for AI-powered bookkeeping.

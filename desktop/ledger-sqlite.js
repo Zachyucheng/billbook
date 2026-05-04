@@ -51,6 +51,76 @@ class LedgerSqliteStore {
     return db;
   }
 
+  /**
+   * Auto-initialize the database with an empty workspace snapshot if none exists.
+   * Safe to call multiple times. Call during startup before using any tools.
+   */
+  async initializeIfEmpty() {
+    return this.withDatabase((db) => this.ensureInitialized(db));
+  }
+
+  /**
+   * Initialize the database with an empty workspace snapshot.
+   * Safe to call multiple times — no-op if snapshot already exists.
+   */
+  ensureInitialized(db) {
+    const existing = this.getWorkspaceSnapshotState(db);
+    if (existing) return existing;
+
+    const snapshot = {
+      workspaceName: "Billbook 生活账本",
+      workspaceDescription: "个人记账工作区",
+      categories: [],
+      objects: [],
+      accounts: [
+        { id: "acc-default", name: "默认账户", type: "cash", balance: 0 },
+      ],
+      transactions: [],
+      preferences: {
+        currency: "CNY",
+        theme: "light",
+        language: "zh-CN",
+        storagePath: "desktop/state",
+      },
+      advancedSettings: {
+        longTermCategories: [],
+      },
+      history: [],
+      teamMembers: [],
+    };
+
+    const syncedAt = new Date().toISOString();
+    db.exec("BEGIN");
+    try {
+      this.setMetadata(db, "synced_at", syncedAt);
+      this.setMetadata(db, "workspace_name", snapshot.workspaceName);
+      this.setMetadata(db, "workspace_description", snapshot.workspaceDescription);
+      this.setMetadata(db, "currency", "CNY");
+      this.setMetadata(db, "theme", "light");
+      this.setMetadata(db, "language", "zh-CN");
+
+      const stmt = db.prepare(
+        "INSERT INTO workspace_snapshot (id, state_json, synced_at) VALUES (1, ?, ?)",
+      );
+      stmt.run([JSON.stringify(snapshot), syncedAt]);
+      stmt.free();
+
+      // Create default account in accounts table
+      const acctStmt = db.prepare(
+        "INSERT INTO accounts (id, name, type, balance) VALUES (?, ?, ?, ?)",
+      );
+      acctStmt.run(["acc-default", "默认账户", "cash", 0]);
+      acctStmt.free();
+
+      db.exec("COMMIT");
+    } catch (e) {
+      db.exec("ROLLBACK");
+      throw e;
+    }
+
+    return snapshot;
+  }
+
   applySchema(db) {
     db.exec(`
       PRAGMA foreign_keys = ON;
