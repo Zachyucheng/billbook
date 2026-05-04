@@ -24,6 +24,7 @@
 /out/
 /build
 /dist-electron/
+/billbook-app/
 
 # dev data (auth store, workspace store)
 /data/

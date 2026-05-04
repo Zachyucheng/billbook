@@ -21,6 +21,7 @@
       "output": "dist-electron",
       "buildResources": "desktop/resources"
     },
+    "electronDist": "./node_modules/electron/dist",
     "files": [
       "desktop/**/*",
       "out/**/*",

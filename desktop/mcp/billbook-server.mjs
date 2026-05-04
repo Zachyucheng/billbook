@@ -22,7 +22,7 @@ function ensureHermesAccess() {
   const flagPath = path.join(rootDir, "desktop", "state", ".hermes-access");
   if (existsSync(flagPath) && readFileSync(flagPath, "utf8").trim() === "disabled") {
     throw new Error(
-      "Hermes 访问已被禁止。请在 Billbook 桌面端「桌面运行时」中开启「允许 Hermes 访问」。",
+      "Hermes 访问已被禁止。请在 Billbook 桌面端「桌面运行时」中开启「允许 Hermes 访问」。 / Hermes access is blocked. Enable it in Billbook Desktop's \"Desktop Runtime\" panel.",
     );
   }
 }
@@ -499,6 +499,92 @@ server.registerTool(
         {
           type: "text",
           text: JSON.stringify(summary, null, 2),
+        },
+      ],
+    };
+  },
+);
+
+server.registerTool(
+  "export_data",
+  {
+    description: "Export all Billbook data (transactions, objects, categories) as JSON or CSV.",
+    inputSchema: {
+      format: z.enum(["json", "csv"]).optional().describe("Output format: json (default) or csv"),
+      objectId: z.string().optional().describe("Filter data to a specific object"),
+    },
+  },
+  async (input) => {
+    ensureHermesAccess();
+    const { format = "json", objectId } = input;
+
+    // Fetch all data
+    const [transactions, objects, categories] = await Promise.all([
+      ledgerStore.searchTransactions({}),
+      ledgerStore.listLedgers(),
+      ledgerStore.listCategories({}),
+    ]);
+
+    // Build lookup maps for resolving IDs to names
+    const objectMap = {};
+    for (const obj of objects) {
+      objectMap[obj.id || obj._id] = obj.name;
+    }
+    const categoryMap = {};
+    for (const cat of categories) {
+      categoryMap[cat.id || cat._id] = cat.name;
+    }
+
+    // Filter by objectId if provided
+    let filteredTransactions = transactions;
+    if (objectId) {
+      filteredTransactions = transactions.filter(
+        (t) => t.objectId === objectId || t.object_id === objectId,
+      );
+    }
+
+    // Prepare the exported dataset
+    const exportData = {
+      transactions: filteredTransactions,
+      objects,
+      categories,
+    };
+
+    if (format === "csv") {
+      // Build CSV with header: date,title,kind,amount,category,object,note
+      const headers = ["date", "title", "kind", "amount", "category", "object", "note"];
+      const rows = [headers.join(",")];
+
+      for (const t of filteredTransactions) {
+        const date = t.date || t.transaction_date || "";
+        const title = (t.title || "").replace(/"/g, '""');
+        const kind = t.kind || "expense";
+        const amount = t.amount ?? 0;
+        const categoryName = categoryMap[t.categoryId || t.category_id] || t.categoryId || "";
+        const objectName = objectMap[t.objectId || t.object_id] || t.objectId || "";
+        const note = (t.note || "").replace(/"/g, '""');
+
+        const row = [
+          date,
+          `"${title}"`,
+          kind,
+          amount,
+          `"${categoryName}"`,
+          `"${objectName}"`,
+          `"${note}"`,
+        ];
+        rows.push(row.join(","));
+      }
+
+      return { content: [{ type: "text", text: rows.join("\n") }] };
+    }
+
+    // Default: JSON format
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(exportData, null, 2),
         },
       ],
     };
