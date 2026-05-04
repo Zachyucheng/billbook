@@ -1,6 +1,6 @@
 # Billbook MCP
 
-> AI 智能记账 · 开源桌面应用 · 连接 Hermes Agent
+> AI 智能记账 · 开源桌面应用 · 标准 MCP 服务
 
 [GitHub 仓库](https://github.com/Zachyucheng/billbook-mcp) | [官网 billbook.top](https://billbook.top)
 
@@ -8,12 +8,12 @@
 
 ## 什么是 Billbook MCP？
 
-Billbook MCP 是一款**个人记账桌面应用**，基于 Electron + Next.js 16 构建。通过 MCP 协议与 Hermes AI Agent 集成，实现一句话记账、智能查询和数据分析。
+Billbook MCP 是一款**个人记账桌面应用**，基于 Electron + Next.js 16 构建。通过标准 **MCP 协议**（Model Context Protocol）提供 AI 智能记账能力，兼容 Hermes Agent、Claude Desktop、Cursor、Continue.dev 等任意支持 MCP 的客户端。
 
 ## ✨ 核心功能
 
 ### 🤖 AI 智能记账
-通过 Hermes Agent 一句话完成记账：
+一句话完成记账，支持任意 MCP 客户端：
 - 「午饭吃了 35 块」
 - 「给猫买粮 200」
 - 「昨天交通费 6 块」
@@ -34,33 +34,46 @@ Billbook MCP 是一款**个人记账桌面应用**，基于 Electron + Next.js 1
 ### 💾 本地存储
 所有数据存储于本地 SQLite 数据库，无需注册账号，无需联网，隐私安全。
 
+### 🔌 标准 MCP 协议
+兼容所有支持 stdio 传输的 MCP 客户端：
+`Hermes Agent` · `Claude Desktop` · `Cursor` · `Continue.dev` · `OpenClaw` · ...
+
 ## 🚀 快速开始
 
-### 1. 安装与运行
+### 方式一：仅使用 MCP 服务（无需桌面端）
 
 ```bash
 git clone https://github.com/Zachyucheng/billbook-mcp.git
 cd billbook-mcp
 npm install
+npm run setup:mcp
+```
+
+然后在你的 MCP 客户端中配置：
+
+```json
+{
+  "mcpServers": {
+    "billbook": {
+      "command": "node",
+      "args": ["desktop/mcp/billbook-server.mjs"],
+      "cwd": "/path/to/billbook-mcp"
+    }
+  }
+}
+```
+
+数据库将在首次启动时自动创建。
+
+### 方式二：桌面端 + MCP
+
+```bash
 npm run desktop:dev
 ```
 
-### 2. 连接 Hermes Agent
+桌面端自带 MCP 服务器，启动后在「桌面运行时」中开启 MCP 访问即可。
 
-在 Hermes `config.yaml` 中添加：
-
-```yaml
-mcp:
-  servers:
-    billbook:
-      command: node
-      args: ["desktop/mcp/billbook-server.mjs"]
-      cwd: "/path/to/billbook-mcp"
-```
-
-重启 Hermes 即可使用 AI 记账功能。
-
-## 🛠️ MCP 工具
+## 🛠️ MCP 工具（共 25 个）
 
 | 类别 | 工具数 | 功能 |
 |:----|:-----:|:-----|
