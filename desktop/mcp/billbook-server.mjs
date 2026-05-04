@@ -71,12 +71,12 @@ const USER_GUIDE = `# 📖 Billbook 使用指南
 - "删除那笔[X元]"
 - "导出/报表"`;
 
-/** Check if user has disabled Hermes access in the app. Throws if disabled. */
-function ensureHermesAccess() {
+/** Check if the desktop app has disabled MCP access. Throws if disabled. */
+function checkAccessGate() {
   const flagPath = path.join(rootDir, "desktop", "state", ".hermes-access");
   if (existsSync(flagPath) && readFileSync(flagPath, "utf8").trim() === "disabled") {
     throw new Error(
-      "Hermes 访问已被禁止。请在 Billbook 桌面端「桌面运行时」中开启「允许 Hermes 访问」。 / Hermes access is blocked. Enable it in Billbook Desktop's \"Desktop Runtime\" panel.",
+      "MCP request rejected: desktop app has disabled external access. Enable it in Billbook Desktop's \"Desktop Runtime\" panel.",
     );
   }
 }
@@ -252,7 +252,7 @@ server.registerTool(
     inputSchema: {},
   },
   async () => {
-    ensureHermesAccess();
+    checkAccessGate();
     const status = await ledgerStore.getDatabaseStatus();
 
     return {
@@ -273,7 +273,7 @@ server.registerTool(
     inputSchema: {},
   },
   async () => {
-    ensureHermesAccess();
+    checkAccessGate();
     const ledgers = await ledgerStore.listLedgers();
 
     return {
@@ -297,7 +297,7 @@ server.registerTool(
     },
   },
   async (input) => {
-    ensureHermesAccess();
+    checkAccessGate();
     const categories = await ledgerStore.listCategories(input);
 
     return {
@@ -323,7 +323,7 @@ server.registerTool(
     },
   },
   async (input) => {
-    ensureHermesAccess();
+    checkAccessGate();
     const result = await ledgerStore.createCategory(input);
     return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
   },
@@ -343,7 +343,7 @@ server.registerTool(
     },
   },
   async (input) => {
-    ensureHermesAccess();
+    checkAccessGate();
     const result = await ledgerStore.createObject(input);
     return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
   },
@@ -365,7 +365,7 @@ server.registerTool(
     },
   },
   async (input) => {
-    ensureHermesAccess();
+    checkAccessGate();
     const result = await ledgerStore.updateObject(input);
     return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
   },
@@ -375,7 +375,7 @@ server.registerTool(
   "create_transaction",
   {
     description:
-      "Create a Billbook transaction for Hermes.\n  objectId: Ledger object ID (e.g. 'obj-self')\n  categoryId: Category ID (e.g. 'cat-food')\n  amount: Transaction amount (> 0)\n  date: YYYY-MM-DD (defaults to today)\n  title: Transaction title/description\n  note: Additional note\n  spreadDays: Spread cost across N days (for long-term expenses)\n  kind: Always 'expense'",
+      "Create a Billbook transaction.\n  objectId: Ledger object ID (e.g. 'obj-self')\n  categoryId: Category ID (e.g. 'cat-food')\n  amount: Transaction amount (> 0)\n  date: YYYY-MM-DD (defaults to today)\n  title: Transaction title/description\n  note: Additional note\n  spreadDays: Spread cost across N days (for long-term expenses)\n  kind: Always 'expense'",
     inputSchema: {
       objectId: z.string(),
       categoryId: z.string(),
@@ -391,7 +391,7 @@ server.registerTool(
     },
   },
   async (input) => {
-    ensureHermesAccess();
+    checkAccessGate();
     const result = await ledgerStore.createTransaction(input);
 
     return {
@@ -415,7 +415,7 @@ server.registerTool(
     },
   },
   async (input) => {
-    ensureHermesAccess();
+    checkAccessGate();
     const result = await ledgerStore.deleteTransaction(input);
 
     return {
@@ -445,7 +445,7 @@ server.registerTool(
     },
   },
   async (input) => {
-    ensureHermesAccess();
+    checkAccessGate();
     const result = await ledgerStore.updateTransaction(input);
 
     return {
@@ -462,7 +462,7 @@ server.registerTool(
 server.registerTool(
   "search_transactions",
   {
-    description: "Search synced Billbook transactions for Hermes workflows.",
+    description: "Search synced Billbook transactions.",
     inputSchema: {
       query: z.string().optional(),
       objectId: z.string().optional(),
@@ -473,7 +473,7 @@ server.registerTool(
     },
   },
   async (input) => {
-    ensureHermesAccess();
+    checkAccessGate();
     const transactions = await ledgerStore.searchTransactions(input);
 
     return {
@@ -499,7 +499,7 @@ server.registerTool(
     },
   },
   async (input) => {
-    ensureHermesAccess();
+    checkAccessGate();
     const result = await ledgerStore.findLastTransaction(input);
 
     return {
@@ -537,7 +537,7 @@ server.registerTool(
     },
   },
   async (input) => {
-    ensureHermesAccess();
+    checkAccessGate();
     const result = await ledgerStore.summarizeCategory(input);
 
     return {
@@ -573,7 +573,7 @@ server.registerTool(
     },
   },
   async (input) => {
-    ensureHermesAccess();
+    checkAccessGate();
     const result = await ledgerStore.listRecurringPlans(input);
 
     return {
@@ -607,7 +607,7 @@ server.registerTool(
     },
   },
   async (input) => {
-    ensureHermesAccess();
+    checkAccessGate();
     const result = await ledgerStore.compareCategoryPeriods(input);
 
     return {
@@ -635,7 +635,7 @@ server.registerTool(
     },
   },
   async (input) => {
-    ensureHermesAccess();
+    checkAccessGate();
     const report = await ledgerStore.exportReport(input);
 
     return {
@@ -664,7 +664,7 @@ server.registerTool(
     },
   },
   async (input) => {
-    ensureHermesAccess();
+    checkAccessGate();
     const summary = await ledgerStore.summarizeObject(input);
 
     return {
@@ -688,7 +688,7 @@ server.registerTool(
     },
   },
   async (input) => {
-    ensureHermesAccess();
+    checkAccessGate();
     const { format = "json", objectId } = input;
 
     // Fetch all data

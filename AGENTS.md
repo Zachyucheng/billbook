@@ -1,6 +1,8 @@
-# Billbook MCP — Hermes Agent 接入指引
+# Billbook MCP — AI Agent 接入指引
 
-本仓库提供了一个 **MCP 服务器**，让 Hermes AI Agent 能够进行 AI 智能记账。
+本仓库提供了一个标准 **MCP 服务器**，兼容任何支持 MCP 协议（stdio 传输）的 AI 客户端。
+
+✅ Hermes Agent · Claude Desktop · Cursor · Continue.dev · OpenClaw · 任意 MCP 客户端
 
 ## 📦 一键安装
 
@@ -10,9 +12,11 @@ cd billbook-mcp
 npm run setup:mcp
 ```
 
-## 🔌 配置 Hermes
+## 🔌 配置
 
-将以下配置添加到 Hermes 的 `config.yaml`：
+### Hermes Agent
+
+添加到 `config.yaml`：
 
 ```yaml
 mcp:
@@ -23,9 +27,23 @@ mcp:
       cwd: "/path/to/billbook-mcp"
 ```
 
-重启 Hermes Agent 即可使用 Billbook 的 25 个 MCP 工具。
+### Claude Desktop / 其他 MCP 客户端
 
-## 🛠️ 可用 MCP 工具
+添加到 `claude_desktop_config.json` 或等效配置文件：
+
+```json
+{
+  "mcpServers": {
+    "billbook": {
+      "command": "node",
+      "args": ["desktop/mcp/billbook-server.mjs"],
+      "cwd": "/path/to/billbook-mcp"
+    }
+  }
+}
+```
+
+## 🛠️ 可用 MCP 工具（共 25 个）
 
 | 类别 | 工具 |
 |:----|:----|
