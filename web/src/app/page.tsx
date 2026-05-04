@@ -5,16 +5,15 @@ import { siteConfig } from "@/lib/site";
 import { BotIcon, UsersIcon, RecurringIcon, ChartIcon, LockIcon, MonitorIcon } from "@/components/feature-icons";
 import { BrandMark } from "@/components/brand-mark";
 
-/* ─── MCP Client SVG Icons ─── */
+/* ─── MCP Client SVG Icons (based on actual logos) ─── */
 
 function OpenClawIcon() {
   return (
     <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
-      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
-      <path d="M14 12 L18 20 L14 28" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M26 12 L22 20 L26 28" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-      <line x1="12" y1="18" x2="17" y2="20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <line x1="28" y1="18" x2="23" y2="20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      {/* Three claw slashes — bear claw style */}
+      <path d="M16 8 C13 16 12 26 14 32" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
+      <path d="M22 6 C20 16 20 28 22 34" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
+      <path d="M28 10 C26 18 26 26 28 30" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
     </svg>
   );
 }
@@ -22,11 +21,14 @@ function OpenClawIcon() {
 function HermesIcon() {
   return (
     <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
-      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
-      <path d="M20 10 L20 30" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M14 14 Q20 18 26 14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
-      <path d="M14 26 Q20 22 26 26" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
-      <circle cx="20" cy="20" r="3" fill="currentColor" />
+      {/* Winged H — Nous Research purple */}
+      <path d="M11 10 L11 30" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+      <path d="M29 10 L29 30" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+      <path d="M11 20 L29 20" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+      {/* Left wing */}
+      <path d="M11 14 C5 14 3 8 7 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      {/* Right wing */}
+      <path d="M29 14 C35 14 37 8 33 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" />
     </svg>
   );
 }
@@ -34,10 +36,10 @@ function HermesIcon() {
 function ClaudeIcon() {
   return (
     <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
-      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
-      <rect x="14" y="12" width="12" height="16" rx="3" stroke="currentColor" strokeWidth="2" />
-      <line x1="17" y1="17" x2="23" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <line x1="17" y1="21" x2="21" y2="21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      {/* Three dots in ascending arch — Anthropic Claude orange */}
+      <circle cx="12" cy="26" r="4" fill="currentColor" />
+      <circle cx="20" cy="16" r="5.5" fill="currentColor" />
+      <circle cx="28" cy="24" r="4" fill="currentColor" />
     </svg>
   );
 }
@@ -45,8 +47,9 @@ function ClaudeIcon() {
 function CursorIcon() {
   return (
     <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
-      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
-      <path d="M16 12 L16 28 L20 23 L24 28" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      {/* Mouse cursor pointer arrow */}
+      <path d="M6 6 L16 20 L11 20 L6 30 Z" fill="currentColor" />
+      <path d="M16 20 L30 30 L22 22 Z" fill="currentColor" />
     </svg>
   );
 }
@@ -54,8 +57,10 @@ function CursorIcon() {
 function ContinueIcon() {
   return (
     <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
-      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
-      <polygon points="16,13 28,20 16,27" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      {/* Circle + play chevron — Continue indigo */}
+      <circle cx="20" cy="20" r="16" fill="currentColor" opacity="0.15" />
+      <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="2" />
+      <polyline points="15,12 26,20 15,28" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </svg>
   );
 }
@@ -63,10 +68,9 @@ function ContinueIcon() {
 function MoreIcon() {
   return (
     <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
-      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" strokeDasharray="4 3" />
-      <circle cx="14" cy="20" r="2" fill="currentColor" />
-      <circle cx="20" cy="20" r="2" fill="currentColor" />
-      <circle cx="26" cy="20" r="2" fill="currentColor" />
+      <circle cx="14" cy="20" r="2.5" fill="currentColor" />
+      <circle cx="20" cy="20" r="2.5" fill="currentColor" />
+      <circle cx="26" cy="20" r="2.5" fill="currentColor" />
     </svg>
   );
 }
