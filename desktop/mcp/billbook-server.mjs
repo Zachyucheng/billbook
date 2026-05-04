@@ -17,6 +17,60 @@ const ledgerStore = new LedgerSqliteStore({
   dbPath: (process.env.BILLBOOK_DESKTOP_DB_PATH || getDefaultDatabasePath()).trim(),
 });
 
+// ── Initialization Guide ────────────────────────────────────────────
+
+const INITIALIZATION_GUIDE = `# 🎉 欢迎使用 Billbook
+
+Billbook 是一款个人记账桌面应用，与 Hermes AI Agent 深度集成。
+
+## 🚀 快速开始
+
+### 1️⃣ 创建你的账本对象
+
+\`\`\`
+create_object(name="我自己", kind="self")
+\`\`\`
+
+### 2️⃣ 创建消费分类
+
+| 分类 | 分组 |
+|------|------|
+| 餐饮 | daily |
+| 日用 | daily |
+| 出行 | transport |
+| 居家开销 | housing |
+| 礼物娱乐 | family |
+| 宠物护理 | pet-care |
+| 学习成长 | growth |
+| 咖啡奶茶 | daily |
+| 其他 | daily |
+
+### 3️⃣ 开始记账
+
+直接说：\`今天午饭 35 块\`、\`给猫买粮 200\`
+
+## 📊 常用查询
+
+- "我这个月花了多少？"
+- "餐饮类花了多少？"
+- "导出数据"
+- "对比上月变化"`;
+
+const USER_GUIDE = `# 📖 Billbook 使用指南
+
+### 记账
+直接说 "吃了个饭 35块" — Hermes 自动分类
+
+### 查询
+- "本月总支出"
+- "[分类]花了多少"
+- "最近一笔[关键词]"
+
+### 管理
+- "修改上一笔"
+- "删除那笔[X元]"
+- "导出/报表"`;
+
 /** Check if user has disabled Hermes access in the app. Throws if disabled. */
 function ensureHermesAccess() {
   const flagPath = path.join(rootDir, "desktop", "state", ".hermes-access");
@@ -34,8 +88,52 @@ async function readText(relativePath) {
 
 const server = new McpServer({
   name: "billbook-desktop",
-  version: "0.1.0",
+  version: "0.1.1",
 });
+
+// ── Prompt / Resource: Initialize Guide ─────────────────────────────
+
+async function getInitGuide() {
+  const status = await ledgerStore.getDatabaseStatus();
+  const isEmpty = status.objectCount === 0 && status.categoryCount === 0;
+  return isEmpty ? INITIALIZATION_GUIDE : USER_GUIDE;
+}
+
+server.prompt(
+  "initialize-guide",
+  {
+    description: "Get the Billbook initialization guide on first MCP connection, or the user guide if data already exists.",
+  },
+  async () => ({
+    messages: [
+      {
+        role: "user",
+        content: {
+          type: "text",
+          text: await getInitGuide(),
+        },
+      },
+    ],
+  }),
+);
+
+server.resource(
+  "billbook://guide",
+  "billbook://guide",
+  {
+    description: "Billbook initialization guide — shown on first connection or when data is empty",
+    mimeType: "text/markdown",
+  },
+  async () => ({
+    contents: [
+      {
+        uri: "billbook://guide",
+        mimeType: "text/markdown",
+        text: await getInitGuide(),
+      },
+    ],
+  }),
+);
 
 server.registerTool(
   "get_project_overview",
@@ -217,11 +315,11 @@ server.registerTool(
   "create_category",
   {
     description:
-      "Create a new Billbook expense or income category. Returns the created category.",
+      "Create a new Billbook expense or income category.\n  name: Category name, e.g. '游戏充值'\n  kind: Category kind ('expense' or 'income', defaults to expense)\n  group: Category group, e.g. 'daily', 'entertainment', 'transport'",
     inputSchema: {
-      name: z.string().min(1).describe("Category name, e.g. '游戏充值'"),
-      kind: z.enum(["expense", "income"]).optional().describe("Category kind, defaults to expense"),
-      group: z.string().optional().describe("Category group, e.g. 'daily', 'entertainment', 'transport'"),
+      name: z.string().min(1),
+      kind: z.enum(["expense", "income"]).optional(),
+      group: z.string().optional(),
     },
   },
   async (input) => {
@@ -235,11 +333,11 @@ server.registerTool(
   "create_object",
   {
     description:
-      "Create a new Billbook ledger object (e.g. a person, pet, vehicle, or project to track expenses for).",
+      "Create a new Billbook ledger object.\n  name: Object name, e.g. '女友', '车子', '公司项目'\n  kind: Object kind (self, partner, pet, vehicle, home, project, family, other; default: other)\n  monthlyBudget: Monthly budget\n  note: Note about this object\n  goal: Saving goal or purpose",
     inputSchema: {
-      name: z.string().min(1).describe("Object name, e.g. '女友', '车子', '公司项目'"),
-      kind: z.enum(["self", "partner", "pet", "vehicle", "home", "project", "family", "other"]).optional().describe("Object kind, defaults to 'other'"),
-      monthlyBudget: z.number().positive().optional().describe("Monthly budget for this object"),
+      name: z.string().min(1),
+      kind: z.enum(["self", "partner", "pet", "vehicle", "home", "project", "family", "other"]).optional(),
+      monthlyBudget: z.number().positive().optional(),
       note: z.string().optional(),
       goal: z.string().optional(),
     },
@@ -255,7 +353,7 @@ server.registerTool(
   "create_transaction",
   {
     description:
-      "Create a Billbook transaction for Hermes and return history-display insight when enabled.",
+      "Create a Billbook transaction for Hermes.\n  objectId: Ledger object ID (e.g. 'obj-self')\n  categoryId: Category ID (e.g. 'cat-food')\n  amount: Transaction amount (> 0)\n  date: YYYY-MM-DD (defaults to today)\n  title: Transaction title/description\n  note: Additional note\n  spreadDays: Spread cost across N days (for long-term expenses)\n  kind: Always 'expense'",
     inputSchema: {
       objectId: z.string(),
       categoryId: z.string(),
@@ -263,8 +361,7 @@ server.registerTool(
       date: z
         .string()
         .regex(/^\d{4}-\d{2}-\d{2}$/)
-        .optional()
-        .describe("YYYY-MM-DD"),
+        .optional(),
       title: z.string().optional(),
       note: z.string().optional(),
       spreadDays: z.number().int().positive().optional(),
@@ -314,15 +411,15 @@ server.registerTool(
   "update_transaction",
   {
     description:
-      "Update a Billbook transaction (category, amount, date, title, note, or spread days). Only the provided fields are changed. Amount changes adjust the account balance accordingly.",
+      "Update a Billbook transaction. Only provided fields are changed; amount changes adjust account balance.\n  transactionId: Transaction ID (required)\n  categoryId: New category ID\n  amount: New amount\n  date: New date (YYYY-MM-DD)\n  title: New title\n  note: New note\n  spreadDays: New spread period in days",
     inputSchema: {
-      transactionId: z.string().describe("The ID of the transaction to update"),
-      categoryId: z.string().optional().describe("New category ID"),
-      amount: z.number().positive().optional().describe("New amount"),
-      date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe("New date (YYYY-MM-DD)"),
-      title: z.string().optional().describe("New title"),
-      note: z.string().optional().describe("New note"),
-      spreadDays: z.number().int().positive().optional().describe("New spread period in days"),
+      transactionId: z.string(),
+      categoryId: z.string().optional(),
+      amount: z.number().positive().optional(),
+      date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+      title: z.string().optional(),
+      note: z.string().optional(),
+      spreadDays: z.number().int().positive().optional(),
     },
   },
   async (input) => {
@@ -649,6 +746,19 @@ async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("Billbook desktop MCP server running on stdio");
+
+  // If database is fresh/empty, log initialization hint to stderr
+  try {
+    const status = await ledgerStore.getDatabaseStatus();
+    if (status.objectCount === 0 && status.categoryCount === 0) {
+      console.error("═══════════════════════════════════════════════════");
+      console.error("  Billbook 账本为空 — 首次使用引导");
+      console.error("  Prompt: initialize-guide  |  Resource: billbook://guide");
+      console.error("═══════════════════════════════════════════════════");
+    }
+  } catch {
+    // swallow — not critical
+  }
 }
 
 main().catch((error) => {

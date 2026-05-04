@@ -1561,9 +1561,6 @@ class LedgerSqliteStore {
         workspaceUserName: metadata.workspace_user_name || "",
       });
 
-      this.run(db, "DELETE FROM transaction_allocations WHERE transaction_id = ?", [transactionId]);
-      this.run(db, "DELETE FROM transactions WHERE id = ?", [transactionId]);
-
       return {
         deleted: {
           id: targetTransaction.id,
@@ -1685,11 +1682,6 @@ class LedgerSqliteStore {
         syncedAt: mutationTimestamp,
         workspaceUserName: metadata.workspace_user_name || "",
       });
-
-      this.run(db,
-        "UPDATE transactions SET title=?, amount=?, date=?, category_id=?, note=?, spread_days=? WHERE id=?",
-        [newTitle, newAmount, newDate, resolvedCategoryId, newNote, newSpreadDays, transactionId],
-      );
 
       return {
         transaction: {
