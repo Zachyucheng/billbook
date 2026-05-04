@@ -8,7 +8,7 @@
 
 ## 什么是 Billbook MCP？
 
-Billbook MCP 是一款**个人记账桌面应用**，基于 Electron + Next.js 16 构建。通过标准 **MCP 协议**（Model Context Protocol）提供 AI 智能记账能力，兼容 Hermes Agent、Claude Desktop、Cursor、Continue.dev 等任意支持 MCP 的客户端。
+Billbook MCP 是一款**个人记账桌面应用**，基于 Electron + Next.js 16 构建。通过标准 **MCP 协议**（Model Context Protocol）提供 AI 智能记账能力，兼容 OpenClaw、Hermes Agent、Claude Desktop、Cursor、Continue.dev 等任意支持 MCP 的客户端。
 
 ## ✨ 核心功能
 
@@ -36,7 +36,7 @@ Billbook MCP 是一款**个人记账桌面应用**，基于 Electron + Next.js 1
 
 ### 🔌 标准 MCP 协议
 兼容所有支持 stdio 传输的 MCP 客户端：
-`Hermes Agent` · `Claude Desktop` · `Cursor` · `Continue.dev` · `OpenClaw` · ...
+`OpenClaw` · `Hermes Agent` · `Claude Desktop` · `Cursor` · `Continue.dev` · ...
 
 ## 🚀 快速开始
 
@@ -61,6 +61,16 @@ npm run setup:mcp
     }
   }
 }
+```
+
+**OpenClaw 配置**（`openclaw.yaml`）：
+
+```yaml
+mcp_servers:
+  billbook:
+    command: node
+    args: [desktop/mcp/billbook-server.mjs]
+    cwd: /path/to/billbook-mcp
 ```
 
 数据库将在首次启动时自动创建。
