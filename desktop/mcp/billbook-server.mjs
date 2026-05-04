@@ -287,6 +287,30 @@ server.registerTool(
 );
 
 server.registerTool(
+  "delete_transaction",
+  {
+    description:
+      "Delete a Billbook transaction by its ID. Removes it from the snapshot, SQLite tables, and restores the account balance.",
+    inputSchema: {
+      transactionId: z.string().describe("The ID of the transaction to delete"),
+    },
+  },
+  async (input) => {
+    ensureHermesAccess();
+    const result = await ledgerStore.deleteTransaction(input);
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(result, null, 2),
+        },
+      ],
+    };
+  },
+);
+
+server.registerTool(
   "search_transactions",
   {
     description: "Search synced Billbook transactions for Hermes workflows.",

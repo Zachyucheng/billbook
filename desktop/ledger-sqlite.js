@@ -1503,6 +1503,77 @@ class LedgerSqliteStore {
       };
     });
   }
+
+  async deleteTransaction(input = {}) {
+    return this.withDatabase(async (db) => {
+      const state = this.getWorkspaceSnapshotState(db);
+      if (!state) throw new Error("Billbook desktop database has no workspace snapshot yet.");
+
+      const transactionId = typeof input.transactionId === "string" ? input.transactionId.trim() : "";
+      if (!transactionId) throw new Error("Transaction ID is required.");
+
+      const transactions = Array.isArray(state.transactions) ? state.transactions : [];
+      const targetIndex = transactions.findIndex((t) => t.id === transactionId);
+      if (targetIndex === -1) throw new Error(`Transaction "${transactionId}" not found.`);
+
+      const targetTransaction = transactions[targetIndex];
+
+      // Remove from snapshot state
+      const nextState = {
+        ...state,
+        transactions: [...transactions.slice(0, targetIndex), ...transactions.slice(targetIndex + 1)],
+        accounts: Array.isArray(state.accounts)
+          ? state.accounts.map((account) =>
+              account.id === targetTransaction.accountId
+                ? { ...account, balance: roundAmount(Number(account.balance || 0) + Number(targetTransaction.amount || 0)) }
+                : account,
+            )
+          : [],
+      };
+
+      const mutationTimestamp = new Date().toISOString();
+      const actorId =
+        Array.isArray(state.teamMembers) && state.teamMembers[0]?.id
+          ? state.teamMembers[0].id
+          : "desktop-mcp";
+
+      nextState.history = appendHistoryEntry(
+        Array.isArray(state.history) ? state.history : [],
+        {
+          action: "delete_transaction",
+          title: "Delete transaction",
+          detail: `Deleted ${targetTransaction.title}.`,
+          actorId,
+        },
+        mutationTimestamp,
+      );
+      nextState.teamMembers = touchTeamMembers(
+        Array.isArray(state.teamMembers) ? state.teamMembers : [],
+        actorId,
+        mutationTimestamp,
+      );
+
+      // Update snapshot and SQLite tables
+      const metadata = this.getMetadataMap(db);
+      this.replaceWorkspaceState(db, {
+        state: nextState,
+        syncedAt: mutationTimestamp,
+        workspaceUserName: metadata.workspace_user_name || "",
+      });
+
+      this.run(db, "DELETE FROM transaction_allocations WHERE transaction_id = ?", [transactionId]);
+      this.run(db, "DELETE FROM transactions WHERE id = ?", [transactionId]);
+
+      return {
+        deleted: {
+          id: targetTransaction.id,
+          title: targetTransaction.title,
+          amount: targetTransaction.amount,
+        },
+        message: `Deleted transaction "${targetTransaction.title}".`,
+      };
+    });
+  }
 }
 
 function buildHistoryDisplayFeedback(state, transaction, objectId) {
