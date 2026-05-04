@@ -63,7 +63,7 @@ export default function Home() {
               href={siteConfig.githubUrl}
               className="inline-flex items-center gap-2 rounded-full bg-[color:var(--accent)] hover:bg-white hover:text-[color:var(--accent)] border border-transparent hover:border-[color:var(--accent)] px-6 py-3 text-white text-[15px] font-semibold transition-colors duration-300"
             >
-              下载 GitHub
+              GitHub 仓库
             </a>
             <Link
               href="/mcp-guide"
@@ -197,7 +197,7 @@ export default function Home() {
             href={siteConfig.githubUrl}
             className="inline-flex items-center gap-2 rounded-full bg-white hover:bg-transparent hover:text-white border border-transparent hover:border-white/40 px-6 py-3 text-[15px] font-semibold text-[color:var(--accent)] transition-colors duration-300"
           >
-            下载 GitHub
+            GitHub 仓库
           </a>
           <Link
             href="/mcp-guide"
