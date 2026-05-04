@@ -14,8 +14,15 @@
 # testing
 /coverage
 
-# next.js (web build) — entire frontend is private
-/web/
+# web frontend — shared with desktop, except website-specific files
+/web/src/components/marketing-page.tsx
+/web/src/components/legal-page.tsx
+/web/src/components/brand-mark.tsx
+/web/src/components/feature-icons.tsx
+/web/src/components/turnstile-widget.tsx
+/web/src/lib/site.ts
+/web/out/
+/web/.next/
 
 # development docs (kept local)
 /docs/

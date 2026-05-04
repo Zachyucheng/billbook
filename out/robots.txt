@@ -6,5 +6,5 @@ Allow: /terms
 Disallow: /api/
 Disallow: /workspace
 
-Host: https://billbook.pages.dev
-Sitemap: https://billbook.pages.dev/sitemap.xml
+Host: https://billbook.top
+Sitemap: https://billbook.top/sitemap.xml
