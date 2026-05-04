@@ -1,41 +1,50 @@
-# Billbook
+# Billbook MCP
 
-🌐 **官网: [billbook.top](https://billbook.top)** | Version **v2.42.0**
+🌐 **官网: [billbook.top](https://billbook.top)** | 开源个人记账桌面应用
 
-Billbook 是一款面向消费对象追踪的桌面账本应用，基于 Electron + Next.js 16 构建。AI 智能记账、长期消费分析、分类占比，一切数据本地存储。
+> **Billbook MCP** — 基于 Electron + Next.js 16 的 AI 智能记账工具，通过 MCP 协议与 Hermes AI Agent 深度集成，一句话完成记账、查询、分析。
 
-> ⚠️ **本软件仅限个人学习与使用，严禁用于任何商业用途。详情见 [NOTICE.md](./NOTICE.md)。**
+---
 
-## 架构
+## ✨ 特性
 
-- `desktop/` — Electron 主进程、preload bridge、Hermes 管理器、本地 MCP 服务器
-- `scripts/` — 开发辅助脚本
+- 🤖 **AI 智能记账** — 对接 Hermes Agent MCP，一句话记一笔：「午饭 35 块」「咖啡 18」
+- 📊 **多对象追踪** — 按人（自己、伴侣、家人）、宠物、项目等对象分别记账
+- 🏷️ **灵活分类** — 自定义消费分类 + 长期分摊（猫粮分60天、订阅服务分30天）
+- 🔍 **智能查询** — 「本月花了多少？」「猫粮最近30天平均多少钱？」
+- 💾 **数据本地存储** — 所有数据存本地 SQLite，不经过云端
+- 📋 **报表导出** — 一键导出 JSON / CSV 格式账单
+- 🇨🇳 **中文原生** — 全中文界面，专为个人/家庭记账场景设计
 
-> 💡 前端源码已从公开仓库中移除，如需获取请联系作者。
+## 🏗️ 项目架构
 
-## 快速开始
+```
+billbook-mcp/
+├── desktop/                  # Electron 桌面应用
+│   ├── main/                 # Electron 主进程
+│   ├── mcp/                  # MCP 服务器
+│   │   └── billbook-server.mjs   # 本地 MCP Server（24+ 工具）
+│   ├── state/                # 本地 SQLite 数据库
+│   └── ledger-sqlite.js      # 数据层（CRUD + 快照同步）
+├── docs/                     # 文档站（GitHub Pages）
+├── scripts/                  # 开发辅助脚本
+└── package.json
+```
+
+## 🚀 快速开始
+
+### 桌面应用
 
 ```bash
 npm install
-npm run desktop:dev     # 启动 Electron 桌面开发环境
-```
-
-## 构建打包
-
-```bash
-npm run build           # 构建 web 前端（需要前端源码）
+npm run desktop:dev     # 启动 Electron 开发环境
 npm run pack:win        # 打包 Windows 安装包
-npm run pack:mac        # 打包 macOS 安装包
 ```
 
-## 连接 Hermes Agent
+### 连接 Hermes Agent
 
-Billbook 内置 MCP 服务器，支持通过 Hermes Agent 进行 AI 智能记账。
-
-### 配置方法
-
-1. 确保 Billbook 桌面端已运行，并在「桌面运行时」页面中开启「允许 Hermes 访问」
-2. 在 Hermes 的 `config.yaml` 中添加 MCP 配置：
+1. 启动 Billbook 桌面端，开启「允许 Hermes 访问」
+2. 在 Hermes `config.yaml` 中添加 MCP 配置：
 
 ```yaml
 mcp:
@@ -43,26 +52,37 @@ mcp:
     billbook:
       command: node
       args: ["desktop/mcp/billbook-server.mjs"]
-      cwd: "/path/to/billbook"
+      cwd: "/path/to/billbook-mcp"
 ```
 
-3. 重启 Hermes Agent，即可使用 Billbook 相关工具
+3. 重启 Hermes，即可使用 Billbook 的 AI 记账能力
 
-### 使用场景
+## 🤖 MCP 工具一览
 
-- **一句话记账**：「刚刚喝了杯咖啡花了 35」→ Hermes 自动创建交易记录
-- **消费查询**：「这个月我在外卖上花了多少钱？」→ 自动汇总返回
-- **长期分析**：「猫砂最近 30 天的平均花费是多少？」→ 对比周期数据
-- **报表导出**：「帮我把上个月的账单整理成 CSV」→ MCP 生成 CSV 文件
+Billbook MCP 提供 **25 个工具**，覆盖完整记账流程：
 
-## 许可协议
+| 类别 | 工具 | 用途 |
+|:----|:----|:----|
+| 📝 记账 | `create_transaction` `update_transaction` `delete_transaction` | 增删改账单 |
+| 🧑 对象 | `create_object` `update_object` `list_ledgers` | 管理消费对象 |
+| 🏷️ 分类 | `create_category` `list_categories` | 管理消费分类 |
+| 🔍 查询 | `search_transactions` `find_last_transaction` | 智能搜索 |
+| 📊 分析 | `summarize_category` `summarize_object` `compare_category_periods` | 周期对比 |
+| 📋 导出 | `export_data` `export_report` | JSON/CSV 导出 |
+| ⚙️ 系统 | `get_database_status` `get_project_overview` | 状态检查 |
 
-本项目采用 **GNU Affero General Public License v3.0 (AGPL-3.0)** 发布，并附加「禁止商业用途」条款。
+## 📖 文档
 
-- ✅ 允许个人学习、研究、非商业使用
-- ✅ 允许非商业分发和修改（需遵守 AGPL-3.0 协议）
-- ❌ **严禁任何形式的商业使用**
-- ❌ 商业使用需获得作者书面授权
+- [MCP 接入指南](./docs/mcp-guide.md) — Hermes Agent 配置详情
+- [桌面端路线图](./docs/desktop-roadmap.md) — 功能规划
+- [Cloudflare 部署](./docs/cloudflare-deployment.md) — 云端部署
+
+## 📄 许可协议
+
+**GNU Affero General Public License v3.0 (AGPL-3.0)** + 附加禁止商业用途条款
+
+- ✅ 个人学习、研究、非商业使用
+- ❌ 严禁任何形式的商业使用
 
 详见 [NOTICE.md](./NOTICE.md) 和 [LICENSE](./LICENSE)。
 
@@ -70,6 +90,8 @@ mcp:
 
 🌐 [English Version](./README.en.md)
 
-📦 **国际物流 · 欧美DDP货代**
-我是做欧美 DDP 双清包税的货代，外贸/跨境电商的朋友有发货需求欢迎联系👇
-**微信 / 电话：v13025498279**
+> ℹ️ 项目已从 Billbook 迁移至 **Billbook MCP**，名称调整以提升 GitHub 可搜索性。
+>
+> 仓库地址：`git@github.com:Zachyucheng/billbook-mcp.git`（改名后更新远程地址）
+
+📦 **国际物流 · 欧美 DDP 货代** — 微信 / 电话：v13025498279

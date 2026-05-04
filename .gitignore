@@ -25,8 +25,9 @@
 /web/.next/
 /web/.wrangler/
 
-# development docs (kept local)
-/docs/
+# development docs (kept local — specific files only, not GitHub Pages docs/)
+/docs/desktop-roadmap.md
+/docs/cloudflare-deployment.md
 
 # production build (desktop) - committed so fresh clones can run
 /build
