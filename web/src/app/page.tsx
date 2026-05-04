@@ -5,13 +5,79 @@ import { siteConfig } from "@/lib/site";
 import { BotIcon, UsersIcon, RecurringIcon, ChartIcon, LockIcon, MonitorIcon } from "@/components/feature-icons";
 import { BrandMark } from "@/components/brand-mark";
 
+/* ─── MCP Client SVG Icons ─── */
+
+function OpenClawIcon() {
+  return (
+    <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
+      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
+      <path d="M14 12 L18 20 L14 28" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M26 12 L22 20 L26 28" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <line x1="12" y1="18" x2="17" y2="20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line x1="28" y1="18" x2="23" y2="20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function HermesIcon() {
+  return (
+    <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
+      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
+      <path d="M20 10 L20 30" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M14 14 Q20 18 26 14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path d="M14 26 Q20 22 26 26" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <circle cx="20" cy="20" r="3" fill="currentColor" />
+    </svg>
+  );
+}
+
+function ClaudeIcon() {
+  return (
+    <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
+      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
+      <rect x="14" y="12" width="12" height="16" rx="3" stroke="currentColor" strokeWidth="2" />
+      <line x1="17" y1="17" x2="23" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line x1="17" y1="21" x2="21" y2="21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CursorIcon() {
+  return (
+    <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
+      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
+      <path d="M16 12 L16 28 L20 23 L24 28" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ContinueIcon() {
+  return (
+    <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
+      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
+      <polygon points="16,13 28,20 16,27" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function MoreIcon() {
+  return (
+    <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
+      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" strokeDasharray="4 3" />
+      <circle cx="14" cy="20" r="2" fill="currentColor" />
+      <circle cx="20" cy="20" r="2" fill="currentColor" />
+      <circle cx="26" cy="20" r="2" fill="currentColor" />
+    </svg>
+  );
+}
+
 const clients = [
-  { name: "OpenClaw", desc: "Open-source MCP client", color: "bg-amber-500" },
-  { name: "Hermes Agent", desc: "AI agent with MCP support", color: "bg-emerald-500" },
-  { name: "Claude Desktop", desc: "Anthropic desktop app", color: "bg-violet-500" },
-  { name: "Cursor", desc: "AI-first code editor", color: "bg-sky-500" },
-  { name: "Continue.dev", desc: "Open-source AI assistant", color: "bg-indigo-500" },
-  { name: "…更多客户端", desc: "任意支持 stdio MCP 的应用", color: "bg-zinc-400" },
+  { name: "OpenClaw", desc: "开源 MCP 客户端", icon: OpenClawIcon },
+  { name: "Hermes Agent", desc: "AI Agent MCP 客户端", icon: HermesIcon },
+  { name: "Claude Desktop", desc: "Anthropic 桌面应用", icon: ClaudeIcon },
+  { name: "Cursor", desc: "AI 代码编辑器", icon: CursorIcon },
+  { name: "Continue.dev", desc: "开源 AI 助手", icon: ContinueIcon },
+  { name: "…更多客户端", desc: "任意支持 stdio MCP 的应用", icon: MoreIcon },
 ];
 
 const features = [
@@ -44,7 +110,7 @@ export default function Home() {
           </h1>
 
           <p className="mt-6 mx-auto max-w-[560px] text-base leading-8 text-[color:var(--muted)] lg:text-lg">
-            通过标准 MCP 协议，支持 <strong>OpenClaw</strong>、<strong>Hermes Agent</strong>、Claude Desktop 等任意 MCP 客户端一句话记账。
+            通过标准 MCP 协议，支持 <strong>OpenClaw</strong>、<strong>Hermes Agent</strong> 等任意 MCP 客户端一句话记账。
             消费对象追踪、长期分摊、本地存储，隐私安全。
           </p>
 
@@ -94,13 +160,32 @@ export default function Home() {
               key={c.name}
               className="panel rounded-[24px] p-5 text-center transition duration-300 hover:-translate-y-0.5 hover:shadow-[0px_8px_32px_rgba(0,0,0,0.04)]"
             >
-              <div className={`mx-auto h-10 w-10 rounded-full ${c.color} flex items-center justify-center text-white text-sm font-bold`}>
-                {c.name.charAt(0)}
+              <div className="mx-auto text-[color:var(--accent)]">
+                <c.icon />
               </div>
               <h3 className="mt-3 text-sm font-semibold">{c.name}</h3>
               <p className="mt-1 text-xs leading-5 text-[color:var(--muted)]">{c.desc}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* MCP Tutorial Banner */}
+      <section className="mt-6 rounded-[28px] border border-[color:var(--accent-soft)] bg-[linear-gradient(135deg,var(--accent-soft),var(--surface-soft))] p-6 lg:p-8">
+        <div className="flex flex-col items-center gap-4 text-center lg:flex-row lg:text-left lg:justify-between">
+          <div>
+            <p className="type-kicker text-[color:var(--accent)]">📖 Tutorial</p>
+            <h3 className="mt-1 text-lg font-semibold">MCP 记账配置教程</h3>
+            <p className="mt-1 text-sm text-[color:var(--muted)] max-w-[500px]">
+              手把手教你在 OpenClaw、Hermes Agent、Claude Desktop 等客户端中配置 Billbook MCP 服务，一句话开始记账。
+            </p>
+          </div>
+          <Link
+            href="/mcp-guide"
+            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-[color:var(--accent)] hover:bg-white hover:text-[color:var(--accent)] border border-transparent hover:border-[color:var(--accent)] px-6 py-3 text-white text-[15px] font-semibold transition-colors duration-300"
+          >
+            查看完整教程 →
+          </Link>
         </div>
       </section>
 
@@ -161,7 +246,7 @@ export default function Home() {
           开始你的 AI 记账之旅
         </h2>
         <p className="mt-4 mx-auto max-w-[520px] text-base leading-8 text-white/90">
-          开源免费，数据本地存储，支持 OpenClaw、Hermes 等 MCP 客户端。现在就试试吧！
+          开源免费，数据本地存储，支持 OpenClaw、Hermes Agent 等 MCP 客户端。现在就试试吧！
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a

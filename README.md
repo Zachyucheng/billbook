@@ -2,18 +2,19 @@
 
 🌐 **官网: [billbook.top](https://billbook.top)** | 开源个人记账桌面应用
 
-> **Billbook MCP** — 基于 Electron + Next.js 16 的 AI 智能记账工具，通过 MCP 协议与 Hermes AI Agent 深度集成，一句话完成记账、查询、分析。
+> **Billbook MCP** — 基于 Electron + Next.js 16 的 AI 智能记账工具，通过标准 MCP 协议与 OpenClaw、Hermes Agent 等客户端集成，一句话完成记账、查询、分析。
 
 ---
 
 ## ✨ 特性
 
-- 🤖 **AI 智能记账** — 对接 Hermes Agent MCP，一句话记一笔：「午饭 35 块」「咖啡 18」
+- 🤖 **AI 智能记账** — 对接 OpenClaw / Hermes Agent 等 MCP 客户端，一句话记一笔：「午饭 35 块」「咖啡 18」
 - 📊 **多对象追踪** — 按人（自己、伴侣、家人）、宠物、项目等对象分别记账
 - 🏷️ **灵活分类** — 自定义消费分类 + 长期分摊（猫粮分60天、订阅服务分30天）
 - 🔍 **智能查询** — 「本月花了多少？」「猫粮最近30天平均多少钱？」
 - 💾 **数据本地存储** — 所有数据存本地 SQLite，不经过云端
 - 📋 **报表导出** — 一键导出 JSON / CSV 格式账单
+- 🔌 **多 MCP 客户端兼容** — 支持 OpenClaw、Hermes Agent、Claude Desktop、Cursor、Continue.dev 等
 - 🇨🇳 **中文原生** — 全中文界面，专为个人/家庭记账场景设计
 
 ## 🏗️ 项目架构
@@ -23,11 +24,13 @@ billbook-mcp/
 ├── desktop/                  # Electron 桌面应用
 │   ├── main/                 # Electron 主进程
 │   ├── mcp/                  # MCP 服务器
-│   │   └── billbook-server.mjs   # 本地 MCP Server（24+ 工具）
+│   │   └── billbook-server.mjs   # 本地 MCP Server（25+ 工具）
 │   ├── state/                # 本地 SQLite 数据库
 │   └── ledger-sqlite.js      # 数据层（CRUD + 快照同步）
 ├── docs/                     # 文档站（GitHub Pages）
 ├── scripts/                  # 开发辅助脚本
+├── web/                      # 官网（billbook.top）
+├── AGENTS.md                 # MCP 客户端接入指南
 └── package.json
 ```
 
@@ -41,25 +44,35 @@ npm run desktop:dev     # 启动 Electron 开发环境
 npm run pack:win        # 打包 Windows 安装包
 ```
 
-### 连接 Hermes Agent
+### 使用 MCP 服务（无需桌面端）
 
-1. 启动 Billbook 桌面端，开启「允许 Hermes 访问」
-2. 在 Hermes `config.yaml` 中添加 MCP 配置：
-
-```yaml
-mcp:
-  servers:
-    billbook:
-      command: node
-      args: ["desktop/mcp/billbook-server.mjs"]
-      cwd: "/path/to/billbook-mcp"
+```bash
+git clone https://github.com/Zachyucheng/billbook-mcp.git
+cd billbook-mcp
+npm install
+npm run setup:mcp
 ```
 
-3. 重启 Hermes，即可使用 Billbook 的 AI 记账能力
+然后在你使用的 MCP 客户端中添加配置：
+
+```yaml
+mcp_servers:
+  billbook:
+    command: node
+    args: [desktop/mcp/billbook-server.mjs]
+    cwd: /path/to/your/billbook-mcp
+```
+
+**OpenClaw** → 编辑 `openclaw.yaml`，添加上述配置。  
+**Hermes Agent** → 编辑 `config.yaml` 的 `mcp_servers` 段。  
+**Claude Desktop** → 在 `claude_desktop_config.json` 中配置。  
+**Cursor / Continue.dev** → 在对应 MCP 配置文件中添加。
+
+> 数据库会在 MCP 服务器首次启动时自动创建。详见 [MCP 配置教程](https://billbook.top/mcp-guide)。
 
 ## 🤖 MCP 工具一览
 
-Billbook MCP 提供 **25 个工具**，覆盖完整记账流程：
+Billbook MCP 提供 **25+ 个工具**，覆盖完整记账流程：
 
 | 类别 | 工具 | 用途 |
 |:----|:----|:----|
@@ -73,7 +86,8 @@ Billbook MCP 提供 **25 个工具**，覆盖完整记账流程：
 
 ## 📖 文档
 
-- [MCP 接入指南](./docs/mcp-guide.md) — Hermes Agent 配置详情
+- [MCP 接入指南](https://billbook.top/mcp-guide) — OpenClaw、Hermes Agent、Claude Desktop 等配置详情
+- [GitHub Pages 文档站](./docs/index.md) — 项目介绍与入门
 - [桌面端路线图](./docs/desktop-roadmap.md) — 功能规划
 - [Cloudflare 部署](./docs/cloudflare-deployment.md) — 云端部署
 
