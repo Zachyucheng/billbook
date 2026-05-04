@@ -5,23 +5,15 @@ import { siteConfig } from "@/lib/site";
 import { BotIcon, UsersIcon, RecurringIcon, ChartIcon, LockIcon, MonitorIcon } from "@/components/feature-icons";
 import { BrandMark } from "@/components/brand-mark";
 
-/* ─── MCP Client Icons (placeholder removed) ─── */
-
-function ClientIcon() {
-  return (
-    <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
-      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
-}
+/* ─── MCP Client Icons (removed) ─── */
 
 const clients = [
-  { name: "OpenClaw", desc: "开源 MCP 客户端", icon: ClientIcon },
-  { name: "Hermes Agent", desc: "AI Agent MCP 客户端", icon: ClientIcon },
-  { name: "Claude Desktop", desc: "Anthropic 桌面应用", icon: ClientIcon },
-  { name: "Cursor", desc: "AI 代码编辑器", icon: ClientIcon },
-  { name: "Continue.dev", desc: "开源 AI 助手", icon: ClientIcon },
-  { name: "…更多客户端", desc: "任意支持 stdio MCP 的应用", icon: ClientIcon },
+  { name: "OpenClaw", desc: "开源 MCP 客户端" },
+  { name: "Hermes Agent", desc: "AI Agent MCP 客户端" },
+  { name: "Claude Desktop", desc: "Anthropic 桌面应用" },
+  { name: "Cursor", desc: "AI 代码编辑器" },
+  { name: "Continue.dev", desc: "开源 AI 助手" },
+  { name: "…更多客户端", desc: "任意支持 stdio MCP 的应用" },
 ];
 
 const features = [
@@ -104,10 +96,7 @@ export default function Home() {
               key={c.name}
               className="panel rounded-[24px] p-5 text-center transition duration-300 hover:-translate-y-0.5 hover:shadow-[0px_8px_32px_rgba(0,0,0,0.04)]"
             >
-              <div className="mx-auto text-[color:var(--accent)]">
-                <c.icon />
-              </div>
-              <h3 className="mt-3 text-sm font-semibold">{c.name}</h3>
+              <h3 className="text-sm font-semibold">{c.name}</h3>
               <p className="mt-1 text-xs leading-5 text-[color:var(--muted)]">{c.desc}</p>
             </div>
           ))}
