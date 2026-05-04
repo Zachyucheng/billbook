@@ -350,6 +350,28 @@ server.registerTool(
 );
 
 server.registerTool(
+  "update_object",
+  {
+    description:
+      "Update a Billbook ledger object. Only provided fields are changed. Use categoryIds to authorize which categories this object can use.\n  id: Object ID (required)\n  name: New object name\n  kind: Object kind\n  note: Note about this object\n  goal: Saving goal or purpose\n  monthlyBudget: Monthly budget\n  categoryIds: Array of category IDs to authorize for this object",
+    inputSchema: {
+      id: z.string(),
+      name: z.string().min(1).optional(),
+      kind: z.enum(["self", "partner", "pet", "vehicle", "home", "project", "family", "other"]).optional(),
+      monthlyBudget: z.number().positive().optional(),
+      note: z.string().optional(),
+      goal: z.string().optional(),
+      categoryIds: z.array(z.string()).optional(),
+    },
+  },
+  async (input) => {
+    ensureHermesAccess();
+    const result = await ledgerStore.updateObject(input);
+    return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+  },
+);
+
+server.registerTool(
   "create_transaction",
   {
     description:

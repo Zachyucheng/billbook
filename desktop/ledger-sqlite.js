@@ -401,13 +401,6 @@ class LedgerSqliteStore {
         throw new Error("Unknown Billbook category.");
       }
 
-      if (
-        !Array.isArray(objectItem.categoryIds) ||
-        !objectItem.categoryIds.includes(categoryItem.id)
-      ) {
-        throw new Error("The selected object cannot use this category.");
-      }
-
       const accounts = Array.isArray(state.accounts) ? state.accounts : [];
       const accountItem = accounts.find((item) => item.id === input.accountId) ?? accounts[0] ?? null;
       if (!accountItem) {
@@ -425,9 +418,7 @@ class LedgerSqliteStore {
             (item) => item.objectId === objectItem.id && item.categoryId === categoryItem.id,
           )
         : null;
-      const spreadDays = longTermSetting
-        ? normalizeSpreadDays(input.spreadDays ?? longTermSetting.cycleDays)
-        : 1;
+      const spreadDays = normalizeSpreadDays(input.spreadDays ?? longTermSetting?.cycleDays ?? 1);
       const nextTransaction = {
         id: createId("txn"),
         title:
@@ -529,9 +520,23 @@ class LedgerSqliteStore {
       const group = (typeof input.group === "string" ? input.group : "daily").trim() || "daily";
 
       const newCategory = { id: categoryId, name, kind, group };
+
+      // Auto-authorize: add this category to all existing objects
+      const nextObjects = Array.isArray(state.objects)
+        ? state.objects.map((obj) => ({
+            ...obj,
+            categoryIds: Array.isArray(obj.categoryIds)
+              ? obj.categoryIds.includes(categoryId)
+                ? obj.categoryIds
+                : [...obj.categoryIds, categoryId]
+              : [categoryId],
+          }))
+        : state.objects;
+
       const nextState = {
         ...state,
         categories: [...categories, newCategory],
+        objects: nextObjects,
       };
 
       const mutationTimestamp = new Date().toISOString();
@@ -598,6 +603,55 @@ class LedgerSqliteStore {
       return {
         object: newObject,
         message: `Created object "${name}".`,
+      };
+    });
+  }
+
+  async updateObject(input = {}) {
+    return this.withDatabase(async (db) => {
+      const state = this.getWorkspaceSnapshotState(db);
+      if (!state) throw new Error("Billbook desktop database has no workspace snapshot yet.");
+
+      const objectId = input.id;
+      if (!objectId) throw new Error("Object ID is required.");
+
+      const objects = Array.isArray(state.objects) ? state.objects : [];
+      const objectIndex = objects.findIndex((o) => o.id === objectId);
+      if (objectIndex === -1) {
+        throw new Error(`Object with ID "${objectId}" not found.`);
+      }
+
+      const existing = objects[objectIndex];
+      const updated = { ...existing };
+
+      if (input.name !== undefined) updated.name = String(input.name).trim();
+      if (input.kind !== undefined) updated.kind = input.kind;
+      if (input.note !== undefined) updated.note = String(input.note);
+      if (input.goal !== undefined) updated.goal = String(input.goal);
+      if (input.monthlyBudget !== undefined) updated.monthlyBudget = Number(input.monthlyBudget);
+      if (input.categoryIds !== undefined) {
+        updated.categoryIds = Array.isArray(input.categoryIds) ? input.categoryIds : [];
+      }
+
+      const nextObjects = [...objects];
+      nextObjects[objectIndex] = updated;
+
+      const nextState = {
+        ...state,
+        objects: nextObjects,
+      };
+
+      const mutationTimestamp = new Date().toISOString();
+      const metadata = this.getMetadataMap(db);
+      this.replaceWorkspaceState(db, {
+        state: nextState,
+        syncedAt: mutationTimestamp,
+        workspaceUserName: metadata.workspace_user_name || "",
+      });
+
+      return {
+        object: updated,
+        message: `Updated object "${updated.name}".`,
       };
     });
   }
