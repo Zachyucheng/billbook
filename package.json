@@ -4,7 +4,7 @@
   "private": true,
   "main": "desktop/main.js",
   "scripts": {
-    "build": "cd web && npm run build && mkdir -p ../out && cp -r out/* ../out/",
+    "build": "node scripts/build.js",
     "build:web": "cd web && npm run build",
     "desktop:dev": "node scripts/desktop-dev.js",
     "desktop:start": "npm run build && electron .",

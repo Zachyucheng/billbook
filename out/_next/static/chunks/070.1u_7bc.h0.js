@@ -1,0 +1,1 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,31079,e=>{"use strict";var t=e.i(43476),o=e.i(71645),i=e.i(18566);e.s(["DesktopGuard",0,function({children:e}){let r=(0,i.useRouter)();return(0,o.useEffect)(()=>{window.billbookDesktop||r.replace("/")},[r]),(0,t.jsx)(t.Fragment,{children:e})}])}]);

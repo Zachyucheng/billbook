@@ -20,8 +20,7 @@
 # development docs (kept local)
 /docs/
 
-# production build (desktop)
-/out/
+# production build (desktop) - committed so fresh clones can run
 /build
 /dist-electron/
 /billbook-app/
