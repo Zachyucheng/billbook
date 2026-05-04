@@ -1574,6 +1574,146 @@ class LedgerSqliteStore {
       };
     });
   }
+
+  async updateTransaction(input = {}) {
+    return this.withDatabase(async (db) => {
+      const state = this.getWorkspaceSnapshotState(db);
+      if (!state) throw new Error("Billbook desktop database has no workspace snapshot yet.");
+
+      const transactionId = typeof input.transactionId === "string" ? input.transactionId.trim() : "";
+      if (!transactionId) throw new Error("Transaction ID is required.");
+
+      const transactions = Array.isArray(state.transactions) ? state.transactions : [];
+      const targetIndex = transactions.findIndex((t) => t.id === transactionId);
+      if (targetIndex === -1) throw new Error(`Transaction "${transactionId}" not found.`);
+
+      const oldTx = transactions[targetIndex];
+      const oldAmount = roundAmount(Number(oldTx.amount || 0));
+
+      // Resolve category if provided
+      let resolvedCategoryId = oldTx.categoryId;
+      let resolvedCategoryName = null;
+      if (typeof input.categoryId === "string" && input.categoryId.trim()) {
+        const entryKind = oldTx.kind || "expense";
+        const categoryItem = Array.isArray(state.categories)
+          ? state.categories.find((c) => c.id === input.categoryId && c.kind === entryKind)
+          : null;
+        if (!categoryItem) throw new Error(`Unknown category "${input.categoryId}".`);
+        resolvedCategoryId = categoryItem.id;
+        resolvedCategoryName = categoryItem.name;
+      }
+
+      // Resolve amount
+      const newAmount = typeof input.amount === "number" && Number.isFinite(input.amount)
+        ? roundAmount(input.amount)
+        : oldAmount;
+      if (newAmount <= 0) throw new Error("Transaction amount must be greater than 0.");
+
+      const amountDiff = roundAmount(newAmount - oldAmount);
+
+      // Resolve date
+      const newDate = input.date ? normalizeDateInput(input.date) : oldTx.date;
+
+      // Resolve title
+      const newTitle = typeof input.title === "string" && input.title.trim()
+        ? input.title.trim()
+        : oldTx.title;
+
+      // Resolve note
+      const newNote = typeof input.note === "string" ? input.note.trim() : oldTx.note;
+
+      // Resolve spreadDays
+      const newSpreadDays = input.spreadDays != null
+        ? normalizeSpreadDays(input.spreadDays)
+        : oldTx.spreadDays;
+
+      const updatedTransaction = {
+        ...oldTx,
+        title: newTitle,
+        amount: newAmount,
+        date: newDate,
+        categoryId: resolvedCategoryId,
+        note: newNote,
+        spreadDays: newSpreadDays,
+        allocations: oldTx.allocations.map((a) => ({ ...a, amount: newAmount / (oldTx.allocations.length || 1) })),
+      };
+
+      const accounts = Array.isArray(state.accounts) ? state.accounts : [];
+      const accountId = oldTx.accountId || (accounts[0]?.id ?? "acc-default");
+      const updatedAccounts = accounts.map((account) => {
+        if (account.id !== accountId) return account;
+        const accountBalance = roundAmount(Number(account.balance || 0));
+        // Reverse old amount, apply new amount (expense reduces balance)
+        return { ...account, balance: roundAmount(accountBalance + amountDiff) };
+      });
+
+      const mutationTimestamp = new Date().toISOString();
+      const actorId =
+        Array.isArray(state.teamMembers) && state.teamMembers[0]?.id
+          ? state.teamMembers[0].id
+          : "desktop-mcp";
+
+      const nextTransactions = [...transactions];
+      nextTransactions[targetIndex] = updatedTransaction;
+
+      const nextState = {
+        ...state,
+        transactions: nextTransactions,
+        accounts: updatedAccounts,
+      };
+
+      nextState.history = appendHistoryEntry(
+        Array.isArray(state.history) ? state.history : [],
+        {
+          action: "update_transaction",
+          title: "Update transaction",
+          detail: `Updated ${oldTx.title}.`,
+          actorId,
+        },
+        mutationTimestamp,
+      );
+      nextState.teamMembers = touchTeamMembers(
+        Array.isArray(state.teamMembers) ? state.teamMembers : [],
+        actorId,
+        mutationTimestamp,
+      );
+
+      // Update snapshot and SQLite tables
+      const metadata = this.getMetadataMap(db);
+      this.replaceWorkspaceState(db, {
+        state: nextState,
+        syncedAt: mutationTimestamp,
+        workspaceUserName: metadata.workspace_user_name || "",
+      });
+
+      this.run(db,
+        "UPDATE transactions SET title=?, amount=?, date=?, category_id=?, note=?, spread_days=? WHERE id=?",
+        [newTitle, newAmount, newDate, resolvedCategoryId, newNote, newSpreadDays, transactionId],
+      );
+
+      return {
+        transaction: {
+          id: updatedTransaction.id,
+          title: updatedTransaction.title,
+          amount: updatedTransaction.amount,
+          date: updatedTransaction.date,
+          categoryId: resolvedCategoryId,
+          categoryName: resolvedCategoryName,
+          note: updatedTransaction.note,
+          spreadDays: updatedTransaction.spreadDays,
+        },
+        changes: {
+          title: newTitle !== oldTx.title,
+          amount: newAmount !== oldAmount,
+          date: newDate !== oldTx.date,
+          category: resolvedCategoryId !== oldTx.categoryId,
+          note: newNote !== oldTx.note,
+          spreadDays: newSpreadDays !== oldTx.spreadDays,
+        },
+        message: `Updated transaction "${newTitle}".`,
+      };
+    });
+  }
 }
 
 function buildHistoryDisplayFeedback(state, transaction, objectId) {

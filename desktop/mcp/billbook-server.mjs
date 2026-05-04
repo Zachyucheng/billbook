@@ -311,6 +311,36 @@ server.registerTool(
 );
 
 server.registerTool(
+  "update_transaction",
+  {
+    description:
+      "Update a Billbook transaction (category, amount, date, title, note, or spread days). Only the provided fields are changed. Amount changes adjust the account balance accordingly.",
+    inputSchema: {
+      transactionId: z.string().describe("The ID of the transaction to update"),
+      categoryId: z.string().optional().describe("New category ID"),
+      amount: z.number().positive().optional().describe("New amount"),
+      date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe("New date (YYYY-MM-DD)"),
+      title: z.string().optional().describe("New title"),
+      note: z.string().optional().describe("New note"),
+      spreadDays: z.number().int().positive().optional().describe("New spread period in days"),
+    },
+  },
+  async (input) => {
+    ensureHermesAccess();
+    const result = await ledgerStore.updateTransaction(input);
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(result, null, 2),
+        },
+      ],
+    };
+  },
+);
+
+server.registerTool(
   "search_transactions",
   {
     description: "Search synced Billbook transactions for Hermes workflows.",
