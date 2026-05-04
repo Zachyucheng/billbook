@@ -107,6 +107,7 @@ function MarketingFooter() {
             <p className="text-sm font-semibold text-white/80">产品</p>
             <ul className="mt-3 space-y-2 text-sm text-white/50">
               <li><a href="/" className="hover:text-white transition-colors">首页</a></li>
+              <li><a href="/mcp-guide" className="hover:text-white transition-colors">MCP 记账教程</a></li>
               <li><span className="text-white/30">{t["cta.download.github"]}</span></li>
             </ul>
           </div>

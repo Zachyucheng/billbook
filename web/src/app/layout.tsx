@@ -12,14 +12,14 @@ export const metadata: Metadata = {
     default: SITE_NAME,
     template: `%s · ${SITE_NAME}`,
   },
-  description: "Billbook 是一款 AI 智能桌面账本，支持 Hermes MCP 一句话记账、消费对象追踪和长期成本分析。数据本地优先，隐私安全。适用于 Windows 和 macOS。",
+  description: "Billbook 是一款 AI 智能桌面账本，支持 OpenClaw、Hermes Agent 等 MCP 客户端一句话记账、消费对象追踪和长期成本分析。数据本地优先，隐私安全。适用于 Windows 和 macOS。",
   applicationName: SITE_NAME,
-  keywords: ["Billbook", "记账", "AI 记账", "桌面账本", "Hermes MCP", "长期消费", "消费对象", "个人理财", "bookkeeping", "AI bookkeeping", "desktop ledger"],
+  keywords: ["Billbook", "记账", "AI 记账", "桌面账本", "OpenClaw", "Hermes MCP", "MCP 记账", "长期消费", "消费对象", "个人理财", "bookkeeping", "AI bookkeeping", "desktop ledger", "MCP"],
   category: "finance",
   authors: [{ name: "Billbook" }],
   openGraph: {
     title: SITE_NAME,
-    description: "AI 智能桌面账本 — Hermes MCP 一句话记账，消费对象追踪，数据本地存储。适用于 Windows 和 macOS。",
+    description: "AI 智能桌面账本 — 一句话记账，支持 OpenClaw、Hermes Agent 等 MCP 客户端。消费对象追踪，数据本地存储。适用于 Windows 和 macOS。",
     url: "https://billbook.top",
     siteName: SITE_NAME,
     locale: "zh_CN",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary",
     title: SITE_NAME,
-    description: "AI-powered desktop bookkeeping app. One-sentence entry via Hermes MCP, spend tracking, local-first privacy.",
+    description: "AI-powered desktop bookkeeping app. One-sentence entry via MCP (OpenClaw, Hermes Agent, Claude Desktop), spend tracking, local-first privacy.",
     images: ["/brand-mark.png"],
   },
   icons: {
@@ -57,7 +57,7 @@ export default function RootLayout({
     name: "Billbook",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Windows, macOS",
-    description: "AI-powered desktop bookkeeping app with Hermes MCP one-sentence entry, spending object tracking, and long-term cost analysis.",
+    description: "AI-powered desktop bookkeeping app with MCP one-sentence entry (OpenClaw, Hermes Agent, Claude Desktop), spending object tracking, and long-term cost analysis.",
     offers: {
       "@type": "Offer",
       price: "0",
