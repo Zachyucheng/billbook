@@ -15,6 +15,8 @@ const workspaceRouteKeys = [
   { href: workspaceRoutes.advanced, key: "nav.advanced" },
 ];
 
+const legalRoutes = ["/legal", "/privacy", "/terms", "/security"];
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isWorkspaceSurface = pathname === "/workspace" || pathname.startsWith("/workspace/");
@@ -33,6 +35,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 function MarketingFrame({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { t, lang, toggleLang } = useI18n();
+  const isLegalRoute = legalRoutes.includes(pathname);
 
   return (
     <BillbookProvider>
@@ -58,7 +61,7 @@ function MarketingFrame({ children }: { children: React.ReactNode }) {
                     <Link
                       href="/legal"
                       className={`ui-chip inline-flex items-center border ${
-                        pathname === "/legal"
+                        isLegalRoute
                           ? "border-transparent btn-accent"
                           : "border-[color:var(--line)] bg-[color:var(--surface-strong)] text-[color:var(--muted)]"
                       }`}
@@ -114,7 +117,9 @@ function MarketingFooter() {
           <div>
             <p className="text-sm font-semibold text-white/80">{lang === "zh" ? "法律" : "Legal"}</p>
             <ul className="mt-3 space-y-2 text-sm text-white/50">
-              <li><Link href="/legal" className="hover:text-white transition-colors">{t["header.privacy"]} & {t["header.terms"]}</Link></li>
+              <li><Link href="/privacy" className="hover:text-white transition-colors">{t["header.privacy"]}</Link></li>
+              <li><Link href="/terms" className="hover:text-white transition-colors">{t["header.terms"]}</Link></li>
+              <li><Link href="/security" className="hover:text-white transition-colors">{lang === "zh" ? "安全说明" : "Security"}</Link></li>
             </ul>
           </div>
         </div>

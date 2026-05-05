@@ -24,7 +24,7 @@ billbook-mcp/
 ├── desktop/                  # Electron 桌面应用
 │   ├── main/                 # Electron 主进程
 │   ├── mcp/                  # MCP 服务器
-│   │   └── billbook-server.mjs   # 本地 MCP Server（25+ 工具）
+│   │   └── billbook-server.mjs   # 本地 MCP Server（21 个工具）
 │   ├── state/                # 本地 SQLite 数据库
 │   └── ledger-sqlite.js      # 数据层（CRUD + 快照同步）
 ├── docs/                     # 文档站（GitHub Pages）
@@ -72,7 +72,7 @@ mcp_servers:
 
 ## 🤖 MCP 工具一览
 
-Billbook MCP 提供 **25+ 个工具**，覆盖完整记账流程：
+Billbook MCP 提供 **21 个工具**，覆盖完整记账流程：
 
 | 类别 | 工具 | 用途 |
 |:----|:----|:----|
@@ -80,9 +80,9 @@ Billbook MCP 提供 **25+ 个工具**，覆盖完整记账流程：
 | 🧑 对象 | `create_object` `update_object` `list_ledgers` | 管理消费对象 |
 | 🏷️ 分类 | `create_category` `list_categories` | 管理消费分类 |
 | 🔍 查询 | `search_transactions` `find_last_transaction` | 智能搜索 |
-| 📊 分析 | `summarize_category` `summarize_object` `compare_category_periods` | 周期对比 |
+| 📊 分析 | `summarize_category` `summarize_object` `compare_category_periods` `list_recurring_plans` | 周期对比与定期计划 |
 | 📋 导出 | `export_data` `export_report` | JSON/CSV 导出 |
-| ⚙️ 系统 | `get_database_status` `get_project_overview` | 状态检查 |
+| ⚙️ 系统 | `get_database_status` `get_project_overview` `get_desktop_environment` `get_desktop_runtime_guide` `read_billbook_doc` | 状态检查与运行时自检 |
 
 ## 📖 文档
 

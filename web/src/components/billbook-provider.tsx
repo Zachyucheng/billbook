@@ -111,6 +111,10 @@ const BillbookContext = createContext<BillbookContextValue | null>(null);
 const OTHER_CATEGORY_ID = "cat-other";
 const OTHER_CATEGORY_NAME = "其它";
 const LONG_TERM_CATEGORY_COLOR = "#0f8a78";
+const DEFAULT_HISTORY_DISPLAY_SETTINGS: HistoryDisplaySettings = {
+  enabled: false,
+  periodDays: 30,
+};
 const GUEST_AUTH_SESSION: AuthSession = {
   user: {
     id: defaultWorkspaceMember.id,
@@ -920,6 +924,14 @@ function normalizeWorkspace(
   _session: AuthSession | null,
   preferences: LocalWorkspacePreferences,
 ): BillbookState {
+  const normalizedAdvancedSettings = {
+    historyDisplay: {
+      ...DEFAULT_HISTORY_DISPLAY_SETTINGS,
+      ...(sqliteState.advancedSettings?.historyDisplay ?? {}),
+    },
+    longTermCategories: sqliteState.advancedSettings?.longTermCategories ?? [],
+  };
+
   return {
     workspaceName: sqliteState.workspaceName ?? "我的账本",
     workspaceDescription: sqliteState.workspaceDescription ?? "",
@@ -930,10 +942,7 @@ function normalizeWorkspace(
     recurringPlans: sqliteState.recurringPlans ?? [],
     teamMembers: sqliteState.teamMembers ?? [],
     history: sqliteState.history ?? [],
-    advancedSettings: sqliteState.advancedSettings ?? {
-      historyDisplay: { enabled: false, periodDays: 30 },
-      longTermCategories: [],
-    },
+    advancedSettings: normalizedAdvancedSettings,
     preferences: {
       ...sqliteState.preferences,
       ...preferences,

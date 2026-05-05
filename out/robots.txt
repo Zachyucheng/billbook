@@ -1,8 +1,11 @@
 User-Agent: *
 Allow: /
 Allow: /auth
+Allow: /legal
 Allow: /privacy
 Allow: /terms
+Allow: /security
+Allow: /mcp-guide
 Disallow: /api/
 Disallow: /workspace
 

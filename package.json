@@ -1,6 +1,8 @@
 {
   "name": "billbook-mcp",
-  "version": "2.41.0",
+  "version": "2.5.1",
+  "description": "Billbook desktop bookkeeping app with local MCP server support.",
+  "author": "Billbook",
   "private": true,
   "main": "desktop/main.js",
   "scripts": {
@@ -37,7 +39,8 @@
           ]
         }
       ],
-      "icon": "desktop/resources/icon.png"
+      "icon": "desktop/resources/icon.png",
+      "signAndEditExecutable": false
     },
     "mac": {
       "target": [

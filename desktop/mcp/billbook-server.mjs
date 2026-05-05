@@ -88,7 +88,7 @@ async function readText(relativePath) {
 
 const server = new McpServer({
   name: "billbook-desktop",
-  version: "0.1.1",
+  version: "0.1.2",
 });
 
 // ── Prompt / Resource: Initialize Guide ─────────────────────────────
@@ -152,6 +152,9 @@ server.registerTool(
             {
               name: packageJson.name,
               version: packageJson.version,
+              toolCount: 21,
+              prompts: ["initialize-guide"],
+              resources: ["billbook://guide"],
               frontend: "Next.js 16 static export",
               backend: "Cloudflare Pages Functions + D1",
               desktop: "Electron shell",
@@ -193,15 +196,25 @@ server.registerTool(
     description: "Read a first-party Billbook desktop or deployment document.",
     inputSchema: {
       topic: z
-        .enum(["desktop-roadmap", "cloudflare-deployment", "readme"])
+        .enum([
+          "desktop-roadmap",
+          "desktop-development",
+          "cloudflare-deployment",
+          "mcp-guide",
+          "readme",
+          "web-development",
+        ])
         .describe("Which Billbook document to load"),
     },
   },
   async ({ topic }) => {
     const topicMap = {
       "desktop-roadmap": "docs/desktop-mcp-roadmap.md",
+      "desktop-development": "docs/desktop-development.md",
       "cloudflare-deployment": "docs/cloudflare-pages-deployment.md",
+      "mcp-guide": "docs/mcp-guide.md",
       readme: "README.md",
+      "web-development": "docs/web-development.md",
     };
 
     const relativePath = topicMap[topic];
@@ -226,12 +239,18 @@ server.registerTool(
   },
   async () => {
     const values = {
+      BILLBOOK_DESKTOP_DB_PATH: process.env.BILLBOOK_DESKTOP_DB_PATH ?? null,
+      BILLBOOK_DESKTOP_DEV: process.env.BILLBOOK_DESKTOP_DEV ?? "false",
+      BILLBOOK_DESKTOP_UPSTREAM_URL: process.env.BILLBOOK_DESKTOP_UPSTREAM_URL ?? null,
+      BILLBOOK_DESKTOP_AUTH_BASE_URL: process.env.BILLBOOK_DESKTOP_AUTH_BASE_URL ?? null,
+      BILLBOOK_DESKTOP_SERVER_PORT: process.env.BILLBOOK_DESKTOP_SERVER_PORT ?? "3210",
       BILLBOOK_DESKTOP_APP_URL: process.env.BILLBOOK_DESKTOP_APP_URL ?? null,
       BILLBOOK_DESKTOP_DEV_SERVER_URL: process.env.BILLBOOK_DESKTOP_DEV_SERVER_URL ?? null,
       BILLBOOK_HERMES_COMMAND: process.env.BILLBOOK_HERMES_COMMAND ?? "hermes",
       BILLBOOK_HERMES_ARGS: process.env.BILLBOOK_HERMES_ARGS ?? "agent",
       BILLBOOK_HERMES_CWD: process.env.BILLBOOK_HERMES_CWD ?? process.cwd(),
       BILLBOOK_HERMES_AUTO_START: process.env.BILLBOOK_HERMES_AUTO_START ?? "false",
+      resolvedDatabasePath: ledgerStore.dbPath,
     };
 
     return {

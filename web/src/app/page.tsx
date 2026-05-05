@@ -35,7 +35,7 @@ export default function Home() {
             <BrandMark className="h-5 w-5" title="Billbook 标识" />
             AI 智能记账 · 标准 MCP 服务
             <span className="ml-1 rounded-full bg-[color:var(--accent-soft)] px-2 py-0.5 text-[11px] font-semibold text-[color:var(--accent)]">
-              v2.41
+              v2.5.1
             </span>
           </div>
 

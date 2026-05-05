@@ -41,7 +41,7 @@ mcp:
 hermes agent
 ```
 
-连接成功后，Hermes 会自动加载 Billbook 的 25 个 MCP 工具。
+连接成功后，Hermes 会自动加载 Billbook 的 21 个 MCP 工具。
 
 ## 可用工具
 
@@ -74,6 +74,9 @@ hermes agent
 - `export_report` — 月度报表
 - `get_database_status` — 数据库状态
 - `get_project_overview` — 项目概况
+- `get_desktop_environment` — 环境变量与数据库路径
+- `get_desktop_runtime_guide` — 桌面运行时说明
+- `read_billbook_doc` — 读取项目内置文档
 
 ## 使用示例
 

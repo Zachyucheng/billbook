@@ -43,7 +43,7 @@ mcp:
 }
 ```
 
-## 🛠️ 可用 MCP 工具（共 25 个）
+## 🛠️ 可用 MCP 工具（共 21 个）
 
 | 类别 | 工具 |
 |:----|:----|
@@ -51,9 +51,9 @@ mcp:
 | 对象 | `create_object` `update_object` `list_ledgers` |
 | 分类 | `create_category` `list_categories` |
 | 查询 | `search_transactions` `find_last_transaction` |
-| 分析 | `summarize_category` `summarize_object` `compare_category_periods` |
+| 分析 | `summarize_category` `summarize_object` `compare_category_periods` `list_recurring_plans` |
 | 导出 | `export_data` `export_report` |
-| 系统 | `get_database_status` `get_project_overview` `get_desktop_environment` |
+| 系统 | `get_database_status` `get_project_overview` `get_desktop_environment` `get_desktop_runtime_guide` `read_billbook_doc` |
 
 ## 🧭 重要路径
 

@@ -78,7 +78,7 @@ npm run setup:mcp</code></pre>
     content: (
       <>
         <p className="mb-3 text-sm leading-7 text-[color:var(--muted)]">
-          配置完成后，你的 MCP 客户端会自动注册以下工具（共 25+ 个）：
+          配置完成后，你的 MCP 客户端会自动注册以下工具（当前共 21 个）：
         </p>
         <div className="overflow-x-auto rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface-strong)] p-4">
           <table className="w-full text-sm">
@@ -112,8 +112,8 @@ npm run setup:mcp</code></pre>
               </tr>
               <tr className="border-b border-[color:var(--line-soft)]">
                 <td className="py-2 pr-4">数据分析</td>
-                <td className="py-2 pr-4">3</td>
-                <td className="py-2">分类汇总、对象汇总、周期对比</td>
+                <td className="py-2 pr-4">4</td>
+                <td className="py-2">分类汇总、对象汇总、周期对比、定期计划</td>
               </tr>
               <tr className="border-b border-[color:var(--line-soft)]">
                 <td className="py-2 pr-4">报表导出</td>
@@ -122,8 +122,8 @@ npm run setup:mcp</code></pre>
               </tr>
               <tr>
                 <td className="py-2 pr-4">系统工具</td>
-                <td className="py-2 pr-4">10+</td>
-                <td className="py-2">数据库状态、项目信息、环境查询等</td>
+                <td className="py-2 pr-4">5</td>
+                <td className="py-2">数据库状态、项目概览、运行时说明、文档读取、环境查询</td>
               </tr>
             </tbody>
           </table>

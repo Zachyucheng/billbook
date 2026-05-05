@@ -2,7 +2,7 @@
 REM Build Windows installer for Billbook
 cd /d "%~dp0"
 
-echo === Building Billbook v2.41.0 Windows Installer ===
+echo === Building Billbook v2.5.1 Windows Installer ===
 echo.
 
 echo [1/3] Installing dependencies...

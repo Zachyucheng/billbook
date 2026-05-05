@@ -1,6 +1,6 @@
 {
   "name": "billbook-web",
-  "version": "2.41.0",
+  "version": "2.5.1",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",

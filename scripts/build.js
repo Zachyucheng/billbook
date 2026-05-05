@@ -12,7 +12,7 @@ const WEB_DIR = path.join(ROOT, "web");
 const OUT_DIR = path.join(ROOT, "out");
 
 if (fs.existsSync(WEB_DIR)) {
-  console.log("[build] web/ found — building frontend...");
+  console.log("[build] web/ found - building frontend...");
   execSync("npm run build", { cwd: WEB_DIR, stdio: "inherit" });
 
   // Copy web/out/* to root out/
@@ -34,7 +34,7 @@ if (fs.existsSync(WEB_DIR)) {
   }
   console.log("[build] build complete.");
 } else {
-  console.log("[build] web/ not found — using pre-built out/ from GitHub.");
+  console.log("[build] web/ not found - using pre-built out/ from GitHub.");
   if (!fs.existsSync(path.join(OUT_DIR, "index.html"))) {
     console.error("[build] ERROR: out/index.html not found! Cannot start.");
     process.exit(1);
