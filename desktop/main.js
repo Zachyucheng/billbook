@@ -325,6 +325,7 @@ app.whenReady()
       dbPath:
         (process.env.BILLBOOK_DESKTOP_DB_PATH || path.join(__dirname, "state", "billbook.sqlite")).trim(),
     });
+    await ledgerStore.initializeIfEmpty();
     void readDatabaseStatus().then(() => {
       broadcastDatabaseStatus();
     });

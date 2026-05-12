@@ -129,6 +129,54 @@ const GUEST_AUTH_SESSION: AuthSession = {
   expiresAt: "2099-12-31T23:59:59.000Z",
 };
 
+function isDesktopBridgeAvailable() {
+  return typeof window !== "undefined" && Boolean(window.billbookDesktop);
+}
+
+function buildDesktopWorkspaceFingerprint(
+  state: BillbookState,
+  workspaceUserName: string | null,
+) {
+  return JSON.stringify({
+    workspaceUserName,
+    state,
+  });
+}
+
+function createDesktopWorkspaceSyncPayload(
+  state: BillbookState,
+  workspaceUserName: string | null,
+  syncedAt: string = new Date().toISOString(),
+) {
+  return {
+    workspaceUserName,
+    syncedAt,
+    state,
+  };
+}
+
+function hasMeaningfulWorkspaceContent(workspace: Partial<BillbookState> | null | undefined) {
+  if (!workspace) {
+    return false;
+  }
+
+  return (
+    (workspace.objects?.length ?? 0) > 0 ||
+    (workspace.transactions?.length ?? 0) > 0 ||
+    (workspace.recurringPlans?.length ?? 0) > 0 ||
+    (workspace.history?.length ?? 0) > 0 ||
+    (workspace.teamMembers?.length ?? 0) > 0 ||
+    (workspace.categories?.length ?? 0) > 0
+  );
+}
+
+function getDesktopSyncUserName(
+  session: AuthSession | null,
+  currentUser: TeamMember | null,
+) {
+  return currentUser?.name ?? session?.user.name ?? null;
+}
+
 function createId(prefix: string): string {
   return prefix + "-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
 }
@@ -215,6 +263,7 @@ export function BillbookProvider({
     ? toTeamMember(authSession.user, state.teamMembers)
     : null;
   const permissions = getPermissions(currentUser?.role);
+  const desktopSyncUserName = getDesktopSyncUserName(authSession, currentUser);
 
   const clearError = useCallback(() => setErrorMessage(null), []);
 
@@ -229,9 +278,11 @@ export function BillbookProvider({
 
   /** Reload state from SQLite — used by refreshFromSqlite, sync guard, and poll */
   const doRefreshFromSqlite = useCallback(async () => {
-    if (typeof window === "undefined" || !window.billbookDesktop) return;
+    if (!isDesktopBridgeAvailable()) return;
+    const desktopBridge = window.billbookDesktop;
+    if (!desktopBridge) return;
     try {
-      const sqliteState = await window.billbookDesktop.readWorkspaceState();
+      const sqliteState = await desktopBridge.readWorkspaceState();
       if (sqliteState && typeof sqliteState === "object") {
         const normalized = normalizeWorkspace(
           sqliteState as BillbookState,
@@ -240,12 +291,14 @@ export function BillbookProvider({
         );
         setState(normalized);
         writeLocalLedger(authSession?.user.id ?? "guest", normalized);
-        const status = await window.billbookDesktop?.getDatabaseStatus();
+        const status = await desktopBridge.getDatabaseStatus();
         if (status?.syncedAt) {
           lastSqliteSyncedAtRef.current = status.syncedAt;
         }
-        const payload = createDesktopWorkspaceSyncPayload(normalized, currentUser);
-        lastDesktopSyncFingerprintRef.current = JSON.stringify(payload);
+        lastDesktopSyncFingerprintRef.current = buildDesktopWorkspaceFingerprint(
+          normalized,
+          getDesktopSyncUserName(authSession, currentUser),
+        );
       }
     } catch (e) {
       console.error("Failed to refresh from SQLite:", e);
@@ -258,12 +311,44 @@ export function BillbookProvider({
 
   // 30s poll: detect SQLite updates from MCP and refresh automatically
   useEffect(() => {
-    if (typeof window === "undefined" || !window.billbookDesktop || !hydrated) {
+    if (!isDesktopBridgeAvailable() || !hydrated) {
+      return;
+    }
+    const desktopBridge = window.billbookDesktop;
+    if (!desktopBridge) {
+      return;
+    }
+
+    return desktopBridge.onDatabaseStatus((status) => {
+      if (!status?.syncedAt) {
+        return;
+      }
+
+      if (!lastSqliteSyncedAtRef.current) {
+        lastSqliteSyncedAtRef.current = status.syncedAt;
+        return;
+      }
+
+      if (
+        new Date(status.syncedAt).getTime() >
+        new Date(lastSqliteSyncedAtRef.current).getTime()
+      ) {
+        void doRefreshFromSqlite();
+      }
+    });
+  }, [hydrated, doRefreshFromSqlite]);
+
+  useEffect(() => {
+    if (!isDesktopBridgeAvailable() || !hydrated) {
+      return;
+    }
+    const desktopBridge = window.billbookDesktop;
+    if (!desktopBridge) {
       return;
     }
     const poll = async () => {
       try {
-        const status = await window.billbookDesktop?.getDatabaseStatus();
+        const status = await desktopBridge.getDatabaseStatus();
         if (
           status?.syncedAt &&
           lastSqliteSyncedAtRef.current &&
@@ -292,16 +377,18 @@ export function BillbookProvider({
   // Guarded UI→SQLite sync: only push if SQLite isn't newer than our last load
   useEffect(() => {
     if (
-      typeof window === "undefined" ||
-      !window.billbookDesktop ||
+      !isDesktopBridgeAvailable() ||
       !hydrated ||
       !authSession
     ) {
       return;
     }
+    const desktopBridge = window.billbookDesktop;
+    if (!desktopBridge) {
+      return;
+    }
 
-    const payload = createDesktopWorkspaceSyncPayload(state, currentUser);
-    const fingerprint = JSON.stringify(payload);
+    const fingerprint = buildDesktopWorkspaceFingerprint(state, desktopSyncUserName);
 
     if (lastDesktopSyncFingerprintRef.current === fingerprint) {
       return;
@@ -329,10 +416,13 @@ export function BillbookProvider({
         // fallthrough to push
       }
 
-      void window.billbookDesktop
-        ?.syncWorkspace(payload)
-        .then(() => {
+      void desktopBridge
+        .syncWorkspace(createDesktopWorkspaceSyncPayload(state, desktopSyncUserName))
+        .then((nextStatus) => {
           lastDesktopSyncFingerprintRef.current = fingerprint;
+          if (nextStatus?.syncedAt) {
+            lastSqliteSyncedAtRef.current = nextStatus.syncedAt;
+          }
         })
         .catch((error) => {
           console.error("Failed to sync workspace to desktop SQLite:", error);
@@ -345,51 +435,78 @@ export function BillbookProvider({
         desktopSyncTimerRef.current = null;
       }
     };
-  }, [authSession, currentUser, hydrated, state, doRefreshFromSqlite]);
+  }, [authSession, desktopSyncUserName, hydrated, state, doRefreshFromSqlite]);
 
   const loadWorkspace = async (session: AuthSession) => {
     const nextLocalPreferences = readLocalPreferences(session.user.id);
+    const localWorkspace = readLocalLedger(session.user.id);
     setLocalPreferences(nextLocalPreferences);
     setLastBackupAt(readLocalBackupMeta(session.user.id).lastBackupAt);
     setAuthSession(session);
 
     // 桌面端：优先从 SQLite 加载，避免 MCP 写入的数据被 localStorage 覆盖
-    if (typeof window !== "undefined" && window.billbookDesktop) {
-      try {
-        const sqliteState = await window.billbookDesktop.readWorkspaceState();
-        if (sqliteState && typeof sqliteState === "object") {
-          const normalized = normalizeWorkspace(
-            sqliteState as BillbookState,
-            session,
-            nextLocalPreferences,
-          );
-          setState(normalized);
-          writeLocalLedger(session.user.id, normalized);
-          // Track SQLite syncedAt so we can detect future changes
-          try {
-            const dbStatus = await window.billbookDesktop.getDatabaseStatus();
-            if (dbStatus?.syncedAt) {
-              lastSqliteSyncedAtRef.current = dbStatus.syncedAt;
+    if (isDesktopBridgeAvailable()) {
+      const desktopBridge = window.billbookDesktop;
+      if (desktopBridge) {
+        try {
+          const sqliteState = await desktopBridge.readWorkspaceState();
+          if (sqliteState && typeof sqliteState === "object") {
+            if (
+              localWorkspace &&
+              hasMeaningfulWorkspaceContent(localWorkspace) &&
+              !hasMeaningfulWorkspaceContent(sqliteState as Partial<BillbookState>)
+            ) {
+              const migrated = normalizeWorkspace(
+                localWorkspace,
+                session,
+                nextLocalPreferences,
+              );
+              setState(migrated);
+              writeLocalLedger(session.user.id, migrated);
+              const nextStatus = await desktopBridge.syncWorkspace(
+                createDesktopWorkspaceSyncPayload(migrated, session.user.name ?? null),
+              );
+              lastDesktopSyncFingerprintRef.current = buildDesktopWorkspaceFingerprint(
+                migrated,
+                session.user.name ?? null,
+              );
+              if (nextStatus?.syncedAt) {
+                lastSqliteSyncedAtRef.current = nextStatus.syncedAt;
+              }
+              return;
             }
-          } catch {
-            // ignore
-          }
-          // 设置初始指纹，避免自动 sync 覆盖相同数据
-          if (lastDesktopSyncFingerprintRef) {
-            const initialPayload = createDesktopWorkspaceSyncPayload(
-              normalized,
-              null,
+
+            const normalized = normalizeWorkspace(
+              sqliteState as BillbookState,
+              session,
+              nextLocalPreferences,
             );
-            lastDesktopSyncFingerprintRef.current = JSON.stringify(initialPayload);
+            setState(normalized);
+            writeLocalLedger(session.user.id, normalized);
+            // Track SQLite syncedAt so we can detect future changes
+            try {
+              const dbStatus = await desktopBridge.getDatabaseStatus();
+              if (dbStatus?.syncedAt) {
+                lastSqliteSyncedAtRef.current = dbStatus.syncedAt;
+              }
+            } catch {
+              // ignore
+            }
+            // 设置初始指纹，避免自动 sync 覆盖相同数据
+            if (lastDesktopSyncFingerprintRef) {
+              lastDesktopSyncFingerprintRef.current = buildDesktopWorkspaceFingerprint(
+                normalized,
+                session.user.name ?? null,
+              );
+            }
+            return;
           }
-          return;
+        } catch {
+          // SQLite 无数据或无连接，fallthrough 到 localStorage
         }
-      } catch {
-        // SQLite 无数据或无连接，fallthrough 到 localStorage
       }
     }
 
-    const localWorkspace = readLocalLedger(session.user.id);
     if (localWorkspace) {
       setState(normalizeWorkspace(localWorkspace, session, nextLocalPreferences));
       return;
@@ -995,17 +1112,6 @@ function getPermissions(role: UserRole | undefined): PermissionSet {
     default:
       return { canEdit: true, canManagePermissions: true, canExport: true };
   }
-}
-
-function createDesktopWorkspaceSyncPayload(
-  state: BillbookState,
-  currentUser: TeamMember | null,
-) {
-  return {
-    workspaceUserName: currentUser?.name ?? null,
-    syncedAt: new Date().toISOString(),
-    state,
-  };
 }
 
 function normalizeWorkspace(

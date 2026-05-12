@@ -146,21 +146,21 @@ export function ManagePage() {
   return (
     <div className="space-y-4">
       <section className="panel panel-strong rounded-[24px] p-4 lg:p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="type-kicker">Settings</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight">{t["settings.title"]}</h2>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
             <Link
               href={workspaceRoutes.home}
-              className="ui-button border border-[color:var(--line)] bg-[color:var(--surface-strong)]"
+              className="ui-button w-full border border-[color:var(--line)] bg-[color:var(--surface-strong)] sm:w-auto"
             >
               {t["settings.gotoAccounts"]}
             </Link>
             <Link
               href={workspaceRoutes.advanced}
-              className="ui-button border border-[color:var(--line)] bg-[color:var(--surface-strong)]"
+              className="ui-button w-full border border-[color:var(--line)] bg-[color:var(--surface-strong)] sm:w-auto"
             >
               {t["settings.gotoAdvanced"]}
             </Link>
@@ -249,7 +249,7 @@ export function ManagePage() {
                 setObjectKind("partner");
               }}
             >
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <input
                   value={objectName}
                   onChange={(event) => setObjectName(event.target.value)}
@@ -262,13 +262,14 @@ export function ManagePage() {
                   value={objectKind}
                   onChange={(nextValue) => setObjectKind(nextValue as ObjectKind)}
                   disabled={!permissions.canEdit}
+                  className="sm:w-[180px]"
                   options={creatableObjectKinds.map((item) => ({
                     value: item,
                     label: getObjectKindLabel(item, t),
                   }))}
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <input
                   value={objectNote}
                   onChange={(event) => setObjectNote(event.target.value)}
@@ -279,7 +280,7 @@ export function ManagePage() {
                 <button
                   type="submit"
                   disabled={isPending || !permissions.canEdit}
-                  className="ui-button btn-accent"
+                  className="ui-button btn-accent w-full sm:w-auto"
                 >
                   {isPending ? t["settings.objects.creating"] : t["settings.objects.create"]}
                 </button>
@@ -341,7 +342,7 @@ export function ManagePage() {
                       );
                     })}
                   </div>
-                  <div className="mt-2 flex gap-2">
+                  <div className="mt-2 flex flex-col gap-2 sm:flex-row">
                     <input
                       value={draftCategory}
                       onChange={(event) => setDraftCategory(event.target.value)}
@@ -354,7 +355,9 @@ export function ManagePage() {
                       placeholder={t["settings.objects.categoryPlaceholder"].replace("{name}", selectedObject.name)}
                       className="ui-control flex-1"
                     />
-                    <ActionButton onClick={submitCategory}>{t["settings.objects.add"]}</ActionButton>
+                    <ActionButton className="w-full sm:w-auto" onClick={submitCategory}>
+                      {t["settings.objects.add"]}
+                    </ActionButton>
                   </div>
                 </div>
               ) : (
@@ -516,15 +519,17 @@ function ChoiceButton({
 function ActionButton({
   onClick,
   children,
+  className,
 }: {
   onClick: () => void;
   children: React.ReactNode;
+  className?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="ui-button border border-[color:var(--line)] bg-[color:var(--surface-strong)]"
+      className={`ui-button border border-[color:var(--line)] bg-[color:var(--surface-strong)] ${className ?? ""}`}
     >
       {children}
     </button>
